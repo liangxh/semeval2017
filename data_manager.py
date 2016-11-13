@@ -82,4 +82,18 @@ def read_wordcount(key_subtask):
     return wc
 
 
+def read_vocab_topN(key_subtask, n):
+    all_wc = read_wordcount(key_subtask)
+
+    # TODO(zxw) return list of top-N frequent words
+    wc = map(lambda k:k[0], all_wc)
+    return wc    
+
+
+def read_vocab_minC(key_subtask, min_c):
+    wc = read_wordcount(key_subtask)
+
+    # TODO(zxw) return list of words whose count >= min_c
+    wc = []
+    return wc    
 
