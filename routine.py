@@ -1,0 +1,75 @@
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@author:
+@created:
+"""
+# TODO(zxw) fill in the fields
+
+import os
+import sys
+import re
+import types
+import data_manager
+
+def clean():
+    """$ ./routine.py clean"""
+
+    import data_cleaner
+    
+    for root, dirs, files in os.walk(data_manager.DIR_RAW):
+        for fname in files:
+            input_fname = os.path.join(root, fname)
+            output_fname = os.path.join(root.replace('raw', 'clean'), re.sub('\.\w+$', '.txt', fname))
+            print "cleaning file %s"%(fname)
+            data_cleaner.clean(input_fname, output_fname)
+
+def countword():
+    """$ ./routine.py wc KEY_SUBTASK"""
+
+    if len(sys.argv) < 3:
+        print "required arguments: KEY_SUBTASK"
+        return
+
+    import wordcount
+
+    key_subtask = sys.argv[2].upper()
+    
+    # TODO(zxw) impolement this function
+    """
+    INITIALIZE wc
+    FOREACH mode IN ["train", "dev", "devtest"]:
+        texts = USE_DATAMANAGER_TO_READ)
+        wc = UPDATE(wc, texts)
+    """
+
+    output_fname = data_manager.fname_wordcount(key_subtask)
+    """
+    EXPORT_WORDCOUNT(wc, output_fname)
+    """
+
+
+funcs = {}
+for name in dir():
+    if not name.startswith('_'): # not builtin-functions
+        func = eval(name)
+        if isinstance(func, types.FunctionType):
+            funcs[func.__name__] = func
+
+def get_help():
+    global funcs
+
+    for func in funcs.values():
+        print "[function] %s\n[usage] %s\n"%(func.__name__, func.__doc__ if func.__doc__ else '<missing>')
+
+
+def main():
+    if len(sys.argv) < 2:
+        get_help()
+    else:
+        func_name = sys.argv[1]    
+        funcs.get(func_name, get_help)()
+
+
+if __name__ == '__main__':
+    main()
