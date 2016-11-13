@@ -64,3 +64,22 @@ def read_texts_labels(key_subtask, mode):
 
     return map(lambda k: (k[-2], k[-1]), lines)
 
+
+def read_wordcount(key_subtask):
+    fname = fname_wordcount(key_subtask)
+    lines = open(fname, 'r').readlines()
+    wc = []
+    for line in lines:
+        line = line.strip()
+        if line == '': continue
+        
+        params = line.split('\t')
+        w = params[0]
+        c = int(params[1])
+
+        wc.append((w, c))
+
+    return wc
+
+
+
