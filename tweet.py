@@ -1,9 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@author: # TODO(zxw) make it your code
+@author: xiwen zhao
 @created: 2016.11.10
-@TODO(zxw) add more functions for different processes
 """
 
 import re

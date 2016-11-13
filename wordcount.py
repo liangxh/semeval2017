@@ -45,7 +45,6 @@ def export(wc, fname_output):
         fname_output: filename for the output file
     """
 
-    # TODO(zxw) implement this function
     f = open(fname_output, 'w')
     wc = sorted(wc, key=lambda t: (-t[1], t[0]))
     for w, c in wc:
