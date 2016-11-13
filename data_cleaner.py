@@ -11,6 +11,9 @@ def clean(input_fname, output_fname):
     texts = open(input_fname, 'r').read()[:-1].split('\n')
     for text in texts:
         items = text.split('\t')
+        if items[-1] == 'Not Available':
+            continue
+
         items[-1] = tweet.preprocess(items[-1])
         f.write('\t'.join(items[1:])+'\n')
     f.close()
