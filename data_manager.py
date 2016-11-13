@@ -33,7 +33,7 @@ def fname_clean(key_subtask, mode):
 
 def fname_wordcount(key_subtask):
     key = unify_subtask_key(key_subtask)
-    return os.path.join(DIR_WORDCOUNT, 'subktask%s.txt'%(key))
+    return os.path.join(DIR_WORDCOUNT, 'subtask%s.txt'%(key))
 
 
 def read_data(key_subtask, mode):
