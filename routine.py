@@ -1,16 +1,16 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@author:
-@created:
+@author: xiwen zhao
+@created: 2016.11.13
 """
-# TODO(zxw) fill in the fields
 
 import os
 import sys
 import re
 import types
 import data_manager
+
 
 def clean():
     """$ ./routine.py clean"""
@@ -24,8 +24,9 @@ def clean():
             print "cleaning file %s"%(fname)
             data_cleaner.clean(input_fname, output_fname)
 
+
 def countword():
-    """$ ./routine.py wc KEY_SUBTASK"""
+    """$ ./routine.py countword KEY_SUBTASK"""
 
     if len(sys.argv) < 3:
         print "required arguments: KEY_SUBTASK"
@@ -34,20 +35,11 @@ def countword():
     import wordcount
 
     key_subtask = sys.argv[2].upper()
-    
-    # TODO(zxw) impolement this function
-    """
-    INITIALIZE wc
-    FOREACH mode IN ["train", "dev", "devtest"]:
-        texts = USE_DATAMANAGER_TO_READ)
-        wc = UPDATE(wc, texts)
-    """
 
-    output_fname = data_manager.fname_wordcount(key_subtask)
-    """
-    EXPORT_WORDCOUNT(wc, output_fname)
-    """
-
+    for mode in ["train", "dev", "devtest"]:
+        texts = data_manager.read_texts(key_subtask, mode)
+        output_fname = data_manager.fname_wordcount(key_subtask)
+        wordcount.export(wordcount.count(texts).items(), output_fname)
 
 funcs = {}
 for name in dir():
@@ -55,6 +47,7 @@ for name in dir():
         func = eval(name)
         if isinstance(func, types.FunctionType):
             funcs[func.__name__] = func
+
 
 def get_help():
     global funcs

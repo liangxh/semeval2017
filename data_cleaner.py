@@ -1,10 +1,8 @@
 # -*- coding: utf8 -*-
 """
-@author:
+@author: xiwen zhao
 @created: 2016.11.13
 """
-
-# TODO(zxw) fill in the fields
 
 import tweet
 

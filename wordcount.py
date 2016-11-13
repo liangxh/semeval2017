@@ -1,13 +1,12 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@author: 
-@created:
+@author: xiwen zhao
+@created: 2016.11.13
 """
-#TODO(zxw) fill in the fields
 
-import tweet
 import tokenizer
+
 
 def count(texts, wc = None):
     """count the frequency of distinct tokens
@@ -24,32 +23,14 @@ def count(texts, wc = None):
     if wc is None:
         wc = {}
 
-    #TODO(zxw) change twitter_tokenize
     for text in texts:
-        tokens = tokenizer.twitter_tokenize(text.strip())
+        tokens = tokenizer.tokenize(text.strip())
         for token in tokens:
             token = token.decode("utf8")
             if token in wc:
                 wc[token] += 1
             else:
                 wc[token] = 1
-
-    return wc
-
-
-def count_singletext(text):
-    wc = {}
-    #TODO(zxw) implement this function
-
-    tokens = tokenizer.twitter_tokenize(text.strip())
-    print tokens  # [u'hello', u',', u'123', u'this', u'is', u'me', u'.', u':)', u':(', u'(', u'(', u'!', u'!', u'!']
-    for token in tokens:
-        token = token.decode("utf8")
-    for token in tokens:
-        if token in wc:
-            wc[token] += 1
-        else:
-            wc[token] = 1
 
     return wc
 
@@ -71,19 +52,4 @@ def export(wc, fname_output):
         line = '%s\t%d\n'%(w, c)
         f.write(line)
     f.close()
-
-def main():
-    #TODO(zxw) implement this function
-
-    wc = {}
-    for fname_input, fname_clean in zip(fnames_input, fnames_clean):
-        clean(fname_input, fname_clean)
-        texts = read_texts(fname_clean)
-        wc = count(texts, wc)
-
-
-    export(wc.items(), 'wordcount.txt')
-
-if __name__ == '__main__':
-    main()
 

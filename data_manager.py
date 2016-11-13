@@ -1,10 +1,9 @@
 #! /usr/bin/env 
 # -*- coding: utf-8 -*-
 """
-@author: 
-@created: 
+@author: xiwen zhao
+@created: 2016.11.13
 """
-# TODO(zxw) fill in the fields
 
 import os
 
@@ -17,19 +16,19 @@ def unify_subtask_key(key):
     key = key.upper()
 
     if key in ["B", "D"]: return "BD"
-    if key in ["C", "E"]: return "CD"
+    if key in ["C", "E"]: return "CE"
     
     return key
 
 
 def fname_raw(key_subtask, mode):
     key = unify_subtask_key(key_subtask)
-    return os.path.join(DIR_RAW, 'subtask%s-%s.tsv'%(key, mode))
+    return os.path.join(DIR_RAW, 'subtask%s_%s.tsv'%(key, mode))
 
 
 def fname_clean(key_subtask, mode):
     key = unify_subtask_key(key_subtask)
-    return os.path.join(DIR_CLEAN, 'subtask%s-%s.txt'%(key, mode))
+    return os.path.join(DIR_CLEAN, 'subtask%s_%s.txt'%(key, mode))
 
 
 def fname_wordcount(key_subtask):
@@ -44,7 +43,8 @@ def read_data(key_subtask, mode):
     with open(fname, 'r') as fobj:
         for line in fobj:
             line = line.strip()
-            if line == '': continue
+            if line == '':
+                continue
 
             lines.append(line.split('\t'))
 
@@ -52,12 +52,15 @@ def read_data(key_subtask, mode):
 
 
 def read_texts(key_subtask, mode):
+    # mode: dev, devtest, train, input
+    # key_subtask: A, B, C, D, E
     lines = read_data(key_subtask, mode)
 
-    return map(lambda k:k[-1], lines)
+    return map(lambda k: k[-1], lines)
 
 
 def read_texts_labels(key_subtask, mode):
-    # TODO(zxw) implement this function like read_texts
-    return []
+    lines = read_data(key_subtask, mode)
+
+    return map(lambda k: (k[-2], k[-1]), lines)
 

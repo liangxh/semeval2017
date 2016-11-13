@@ -10,11 +10,8 @@ import re
 
 pattern_space = re.compile(r'\s+')  # s->blank space
 pattern_http = re.compile(r'https?://\S+')
-#pattern_punct = re.compile(r'[,\.\'"]') # TODO(zxw) add punctuations if necessary
-# why '"
-pattern_punct = re.compile(r'[!\"\$&\'\(\)\*\+,\-\./:;<=>\?@\[\\\]\^_`\{\|\}~]')
-# how about emoticons expressed by punctuations?
-# keep # for hashtags
+pattern_punct = re.compile(r'[!\"\$&\'\(\)\*\+,\-\./:;=\?@\[\\\]\^_`\{\|\}~]')
+# keep # for hashtags, and keep < > for specific tokens like <LINK>
 pattern_mention = re.compile(r'@\S+')
 pattern_shorten = re.compile(r'')
 
@@ -53,8 +50,8 @@ def preprocess(text):
     text = replace_mention(text)
     #text = remove_punct(text)
 
-    ## must be done at last
-    #text = merge_space(text).strip()
+    # must be done at last
+    text = merge_space(text).strip()
 
     return text
 
