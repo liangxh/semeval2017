@@ -62,7 +62,7 @@ def read_texts(key_subtask, mode):
 def read_texts_labels(key_subtask, mode):
     lines = read_data(key_subtask, mode)
 
-    return map(lambda k: (k[-2], k[-1]), lines)
+    return map(lambda k: (k[-2], k[-1]), lines)  # list of tuple (label, text)
 
 
 def read_wordcount(key_subtask):
@@ -79,21 +79,25 @@ def read_wordcount(key_subtask):
 
         wc.append((w, c))
 
-    return wc
+    return wc  # list of tuple
 
 
 def read_vocab_topN(key_subtask, n):
     all_wc = read_wordcount(key_subtask)
 
-    # TODO(zxw) return list of top-N frequent words
-    wc = map(lambda k:k[0], all_wc)
+    wc = map(lambda k: k[0], all_wc)  # list of str
+    wc = wc[:n]
     return wc    
 
 
 def read_vocab_minC(key_subtask, min_c):
-    wc = read_wordcount(key_subtask)
+    all_wc = read_wordcount(key_subtask)
 
-    # TODO(zxw) return list of words whose count >= min_c
-    wc = []
+    for i in range(len(all_wc)):
+        if all_wc[i][1] >= min_c:
+            continue
+        break
+    wc = all_wc[:i]
+    wc = map(lambda k: k[0], wc)
     return wc    
 

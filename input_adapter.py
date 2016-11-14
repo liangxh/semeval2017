@@ -1,11 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@author: 
-@created:
+@author: xiwen zhao
+@created: 2016.11.14
 """
 
-# TODO(zxw) fill in the header
 
 import tokenizer
 import data_manager
@@ -34,22 +33,22 @@ def adapt_x(texts, vocabs):
 
 
 def adapt_y(labels, key_subtask):
-    # TODO(zxw) implement this function like adapt_x; HINT: use get_indexer
+    indexer = get_indexer(key_subtask)
+    y = map(indexer.idx, labels)
 
-    y = []
     return y 
 
 
 def test():
     key_subtask = 'A'
-    mode = 'train'
+    mode = 'train'  # CAUTION: input has no labels
 
-    # TODO(zxw) initialize vocabs using data_manager.read_vocab_XXXX
-    vocabs = []
+    #vocabs = data_manager.read_vocab_minC(key_subtask, 1)
+    vocabs = data_manager.read_vocab_topN(key_subtask, 4000)
 
-    # TODO(zxw) read texts (list of string) and labels (list of string) using data_manager.read_texts_labels
-    texts = []
-    labels = []
+    labels_texts = data_manager.read_texts_labels(key_subtask, mode)
+    labels = map(lambda k: k[0], labels_texts)
+    texts = map(lambda k: k[1], labels_texts)
 
     x = adapt_x(texts, vocabs)
     y = adapt_y(labels, key_subtask)
