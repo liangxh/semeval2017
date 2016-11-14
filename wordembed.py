@@ -62,7 +62,7 @@ def get(vocabs, fname_Wemb, dim):
 
     vecs = np.asarray(vecs)
 
-    return vecs
+    return vecs  # array of array
 
 
 def test():

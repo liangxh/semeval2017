@@ -23,18 +23,18 @@ from keras import backend as K
 
 
 # set parameters:
-max_features = 5000
 maxlen = 45
 batch_size = 32
 embedding_dims = 25
+wemb_file = 'glove.twitter.27B.25d.txt'
 nb_filter = 250
 filter_length = 3
 hidden_dims = 250
 nb_epoch = 20
 
 print('Loading data...')
-key_subtask = 'B'
-vocabs = data_manager.read_vocabs_topN(key_subtask, max_features)
+key_subtask = 'A'
+vocabs = data_manager.read_vocabs(key_subtask)
 max_features = len(vocabs)
 
 text_indexer = input_adapter.get_text_indexer(vocabs)
@@ -44,9 +44,8 @@ dataset = []
 for mode in ['train', 'dev', 'devtest']:
     texts_labels = data_manager.read_texts_labels(key_subtask, mode)
     x, y = input_adapter.adapt_texts_labels(texts_labels, text_indexer, label_indexer)
-    print(min(x))
+
     dataset.append((x, y))
-exit()
 
 dataset = tuple(dataset)  # list of 2 tuples --> tuple of tuple
 train, dev, devtest = dataset
@@ -54,9 +53,7 @@ X_train, y_train = train
 X_dev, y_dev = dev
 X_test, y_test = devtest
 
-Wemb = wordembed.get(vocabs, 'glove.twitter.27B.25d.txt', 25)  # list of numpy array
-#print(len(Wemb), Wemb)
-
+Wemb = wordembed.get(vocabs, wemb_file, embedding_dims)  # array of 4380 arrays
 
 print(len(X_train), 'train sequences')
 print(len(X_dev), 'development sequences')
@@ -112,5 +109,5 @@ model.fit(X_train, y_train,
 
 score, acc = model.evaluate(X_test, y_test,
                             batch_size=batch_size)
-print('Test score:', score)
-print('Test accuracy:', acc)  # 0.795589
+
+print('Test accuracy:', acc)  # 0.795589 --> 0.830365(new embedding)
