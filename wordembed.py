@@ -60,6 +60,8 @@ def get(vocabs, fname_Wemb, dim):
             if idx == n_notsupported:
                 break
 
+    vecs = np.asarray(vecs)
+
     return vecs
 
 
