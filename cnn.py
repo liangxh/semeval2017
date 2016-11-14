@@ -32,7 +32,7 @@ nb_epoch = 20
 
 print('Loading data...')
 key_subtask = 'B'
-vocabs = data_manager.read_vocab_topN(key_subtask, max_features)
+vocabs = data_manager.read_vocabs_topN(key_subtask, max_features)
 
 text_indexer = input_adapter.get_text_indexer(vocabs)
 label_indexer = input_adapter.get_label_indexer(key_subtask)

@@ -56,8 +56,8 @@ def test():
     key_subtask = 'A'
     mode = 'train'  # CAUTION: input has no labels
 
-    #vocabs = data_manager.read_vocab_minC(key_subtask, 1)
-    vocabs = data_manager.read_vocab_topN(key_subtask, 4000)
+    #vocabs = data_manager.read_vocabs_minC(key_subtask, 1)
+    vocabs = data_manager.read_vocabs_topN(key_subtask, 4000)
 
     dataset = []
     for mode in ['train', 'dev', 'devtest']:
