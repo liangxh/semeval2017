@@ -11,6 +11,7 @@ DIR_DATA = os.path.join(os.path.dirname(__file__), '../data')
 DIR_RAW = os.path.join(DIR_DATA, 'raw')
 DIR_CLEAN = os.path.join(DIR_DATA, 'clean')
 DIR_WORDCOUNT = os.path.join(DIR_DATA, 'wordcount')
+DIR_COMMON = os.path.join(DIR_DATA, 'common')
 
 def unify_subtask_key(key):
     key = key.upper()
