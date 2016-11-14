@@ -10,7 +10,7 @@ import tokenizer
 import data_manager
 from indexer import Indexer
 
-def get_indexer(key_subtask):
+def get_label_indexer(key_subtask):
     if key_subtask == 'A':
         return Indexer(['negative', 'neutral', 'positive'])
 
@@ -23,20 +23,33 @@ def get_indexer(key_subtask):
     return None
 
 
-def adapt_x(texts, vocabs):
-    indexer = Indexer(vocabs)
-
-    texts = map(tokenizer.tokenize, texts)
-    x = map(indexer.idx, texts)
-
-    return x
+def get_text_indexer(vocabs):
+    return Indexer(vocabs)
 
 
-def adapt_y(labels, key_subtask):
-    indexer = get_indexer(key_subtask)
-    y = map(indexer.idx, labels)
+def adapt_texts_labels(texts_labels, text_indexer, label_indexer):
+    """
+    Used for model training
 
-    return y 
+    Args:
+        texts_labels: list of tuple, for example: [('how are you', 'positive'), ...]
+        text_indexer: an indexer for text; obtained by $get_text_indexer
+        label_indexer: an indexer for label; obtained by $get_label_indexer    
+
+    Return:
+        two lists; the first list is composed of list of lists of tokenIDs
+        the second list is composed of list of indexed labels
+    """
+
+    x = []
+    y = []
+    for text, label in texts_labels:
+        tokens = tokenizer.tokenize(text)
+
+        x.append(text_indexer.idx(tokens))
+        y.append(label_indexer.idx(label))
+
+    return x, y
 
 
 def test():
@@ -46,15 +59,23 @@ def test():
     #vocabs = data_manager.read_vocab_minC(key_subtask, 1)
     vocabs = data_manager.read_vocab_topN(key_subtask, 4000)
 
-    labels_texts = data_manager.read_texts_labels(key_subtask, mode)
-    labels = map(lambda k: k[0], labels_texts)
-    texts = map(lambda k: k[1], labels_texts)
+    dataset = []
+    for mode in ['train', 'dev', 'devtest']:
+        texts_labels = data_manager.read_texts_labels(key_subtask, mode)
 
-    x = adapt_x(texts, vocabs)
-    y = adapt_y(labels, key_subtask)
+        text_indexer = get_text_indexer(vocabs)
+        label_indexer = get_label_indexer(key_subtask)
 
-    print x[1] # list of tokenID is expected
-    print y[1] # an integer is expected
+
+        x, y = adapt_texts_labels(texts_labels, text_indexer, label_indexer)
+        dataset.append((x, y))
+
+    dataset = tuple(dataset)
+    train, dev, devtest = dataset
+    train_X, train_Y = train     
+    print train_X[0]
+    print train_Y[0]  
+
 
 if __name__ == '__main__':
     test()

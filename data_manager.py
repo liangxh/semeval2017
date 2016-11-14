@@ -63,7 +63,7 @@ def read_texts(key_subtask, mode):
 def read_texts_labels(key_subtask, mode):
     lines = read_data(key_subtask, mode)
 
-    return map(lambda k: (k[-2], k[-1]), lines)  # list of tuple (label, text)
+    return map(lambda k: (k[-1], k[-2]), lines)
 
 
 def read_wordcount(key_subtask):
@@ -100,5 +100,5 @@ def read_vocab_minC(key_subtask, min_c):
         break
     wc = all_wc[:i]
     wc = map(lambda k: k[0], wc)
-    return wc    
+    return wc
 
