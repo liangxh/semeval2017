@@ -43,7 +43,7 @@ def get(vocabs, fname_Wemb, dim):
             vocab = line[:loc]
             if vocab in vocab_dict:
                 idx = vocab_dict[vocab]
-                vecs[idx] = np.asarray(map(float, line.split(' ')[1:]))
+                vecs[idx] = np.array(map(float, line.split(' ')[1:]))
 
                 count += 1
                 if count == n_vocab:

@@ -10,6 +10,7 @@ from __future__ import print_function
 import numpy as np
 import data_manager
 import input_adapter
+import wordembed
 np.random.seed(1337)  # for reproducibility
 
 from keras.preprocessing import sequence
@@ -41,7 +42,9 @@ dataset = []
 for mode in ['train', 'dev', 'devtest']:
     texts_labels = data_manager.read_texts_labels(key_subtask, mode)
     x, y = input_adapter.adapt_texts_labels(texts_labels, text_indexer, label_indexer)
+    print(min(x))
     dataset.append((x, y))
+exit()
 
 dataset = tuple(dataset)  # list of 2 tuples --> tuple of tuple
 train, dev, devtest = dataset
@@ -49,6 +52,8 @@ X_train, y_train = train
 X_dev, y_dev = dev
 X_test, y_test = devtest
 
+Wemb = wordembed.get(vocabs, 'glove.twitter.27B.25d.txt', 25)  # list of numpy array
+#print(len(Wemb), Wemb)
 
 print(len(X_train), 'train sequences')
 print(len(X_dev), 'development sequences')
@@ -70,6 +75,7 @@ model = Sequential()
 model.add(Embedding(max_features,
                     embedding_dims,
                     input_length=maxlen,
+                    weights=Wemb,
                     dropout=0.2))
 
 # we add a Convolution1D, which will learn nb_filter
