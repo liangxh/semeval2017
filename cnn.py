@@ -32,7 +32,7 @@ nb_epoch = 20
 
 print('Loading data...')
 key_subtask = 'C'
-vocabs = data_manager.read_vocab_topN(key_subtask, max_features)
+vocabs = data_manager.read_vocabs_topN(key_subtask, max_features)
 
 dataset = []
 for mode in ['train', 'dev']:
