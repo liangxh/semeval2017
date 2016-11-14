@@ -84,12 +84,20 @@ def read_wordcount(key_subtask):
     return wc  # list of tuple
 
 
-def read_vocabs_topN(key_subtask, n):
+def read_vocabs(key_subtask):
     all_wc = read_wordcount(key_subtask)
 
-    wc = map(lambda k: k[0], all_wc)  # list of str
-    wc = wc[:n]
-    return wc    
+    vocabs = map(lambda k: k[0], all_wc)  # list of str
+    return vocabs    
+
+
+def read_vocabs_topN(key_subtask, n):
+    vocabs = read_vocabs(key_subtask)
+
+    if n > len(vocabs):
+        vocabs = vocabs[:n]
+
+    return vocabs
 
 
 def read_vocabs_minC(key_subtask, min_c):
