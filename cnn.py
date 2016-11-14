@@ -10,6 +10,7 @@ from __future__ import print_function
 import numpy as np
 import data_manager
 import input_adapter
+import wordembed
 np.random.seed(1337)  # for reproducibility
 
 from keras.preprocessing import sequence
@@ -20,11 +21,12 @@ from keras.layers import Convolution1D, GlobalMaxPooling1D
 from keras import backend as K
 
 
+
 # set parameters:
 max_features = 5000
 maxlen = 45
 batch_size = 32
-embedding_dims = 50
+embedding_dims = 25
 nb_filter = 250
 filter_length = 3
 hidden_dims = 250
@@ -33,6 +35,7 @@ nb_epoch = 20
 print('Loading data...')
 key_subtask = 'B'
 vocabs = data_manager.read_vocabs_topN(key_subtask, max_features)
+max_features = len(vocabs)
 
 text_indexer = input_adapter.get_text_indexer(vocabs)
 label_indexer = input_adapter.get_label_indexer(key_subtask)
@@ -49,6 +52,7 @@ X_train, y_train = train
 X_dev, y_dev = dev
 X_test, y_test = devtest
 
+Wemb = wordembed.get(vocabs, 'glove.twitter.27B.25d.txt', 25)
 
 print(len(X_train), 'train sequences')
 print(len(X_dev), 'development sequences')
@@ -70,6 +74,7 @@ model = Sequential()
 model.add(Embedding(max_features,
                     embedding_dims,
                     input_length=maxlen,
+                    weights=[Wemb],
                     dropout=0.2))
 
 # we add a Convolution1D, which will learn nb_filter
