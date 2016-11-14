@@ -70,7 +70,7 @@ def test():
         x, y = adapt_texts_labels(texts_labels, text_indexer, label_indexer)
         dataset.append((x, y))
 
-    dataset = tuple(dataset)
+    dataset = tuple(dataset)  # list of 3 tuples --> tuple of tuple
     train, dev, devtest = dataset
     train_X, train_Y = train     
     print train_X[0]
