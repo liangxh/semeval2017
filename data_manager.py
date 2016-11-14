@@ -12,6 +12,7 @@ DIR_RAW = os.path.join(DIR_DATA, 'raw')
 DIR_CLEAN = os.path.join(DIR_DATA, 'clean')
 DIR_WORDCOUNT = os.path.join(DIR_DATA, 'wordcount')
 DIR_COMMON = os.path.join(DIR_DATA, 'common')
+DIR_WEMB = os.path.join(DIR_DATA, 'wemb')
 
 def unify_subtask_key(key):
     key = key.upper()
@@ -83,7 +84,7 @@ def read_wordcount(key_subtask):
     return wc  # list of tuple
 
 
-def read_vocab_topN(key_subtask, n):
+def read_vocabs_topN(key_subtask, n):
     all_wc = read_wordcount(key_subtask)
 
     wc = map(lambda k: k[0], all_wc)  # list of str
@@ -91,7 +92,7 @@ def read_vocab_topN(key_subtask, n):
     return wc    
 
 
-def read_vocab_minC(key_subtask, min_c):
+def read_vocabs_minC(key_subtask, min_c):
     all_wc = read_wordcount(key_subtask)
 
     for i in range(len(all_wc)):
@@ -101,4 +102,6 @@ def read_vocab_minC(key_subtask, min_c):
     wc = all_wc[:i]
     wc = map(lambda k: k[0], wc)
     return wc
+
+
 
