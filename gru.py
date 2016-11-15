@@ -57,7 +57,3 @@ score, acc = model.evaluate(test[0], test[1],
                             batch_size=batch_size)
 
 print('Test accuracy:', acc)
-
-'''
-loss='binary_crossentropy' optimizer = 'adam' 0.73782
-'''

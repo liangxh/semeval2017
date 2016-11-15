@@ -68,4 +68,3 @@ class BaseTrainer:
 
         print 'Test accuracy:', acc
 
-
