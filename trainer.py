@@ -1,11 +1,10 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@author:
-@created:
+@author: xiwen zhao
+@created: 2016.11.15
 """
 
-# TODO(zxw) fill in the header and read the re-constructed code
 
 from keras.utils import np_utils
 from keras.preprocessing import sequence
@@ -13,13 +12,14 @@ from keras.preprocessing import sequence
 from common import data_manager, input_adapter, wordembed
 
 import numpy as np
-np.random.seed(1337)  # for reproducibility
+# np.random.seed(1337)  # for reproducibility
+
 
 def prepare_dataset(key_subtask, vocabs):
     text_indexer = input_adapter.get_text_indexer(vocabs)
     label_indexer = input_adapter.get_label_indexer(key_subtask)
 
-    def prepare_dataset(mode):
+    def prepare_dataset(mode):  # 函数里定义函数?
         texts_labels = data_manager.read_texts_labels(key_subtask, mode)
         x, y = input_adapter.adapt_texts_labels(texts_labels, text_indexer, label_indexer)
         return x, y
@@ -51,14 +51,16 @@ dataset = prepare_dataset(key_subtask, vocabs)
 train, valid, test = map(lambda dset: prepare_input(dset, input_length), dataset)
 
 # set weights for building model
+# why convert to dict???
 weights = dict(
     Wemb = wordembed.get(vocabs, wemb_file),
 )
+# weights['Wemb'].shape == (5635, 25)
 
 # set parameters for building model according to dataset and weights
 config = dict(
     # parameters related to the dataset
-    nb_classes = len(set(dataset[0][1])),
+    nb_classes = len(set(dataset[0][1])),  # use set() to filter repetitive classes
     max_features = len(vocabs),
     input_length = input_length,
     embedding_dims = weights['Wemb'].shape[1],
@@ -86,3 +88,8 @@ score, acc = model.evaluate(
             )
 
 print 'Test accuracy:', acc
+'''
+loss='binary_crossentropy' optimizer = 'adam'  0.71358
+loss='binary_crossentropy' optimizer = 'sgd'  0.72955
+loss='binary_crossentropy' optimizer = sgd  0.74354 -- lr=0.01, decay=1e-6, momentum=0.9, nesterov=False
+'''
