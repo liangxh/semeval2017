@@ -13,7 +13,7 @@ SEED = 111
 np.random.seed(SEED)
 
 
-def get(vocabs, fname_Wemb, dim):
+def get(vocabs, fname_Wemb):
     """get the weight matrix for word-embedding
 
     Args:
@@ -48,6 +48,8 @@ def get(vocabs, fname_Wemb, dim):
                 count += 1
                 if count == n_vocab:
                     break
+
+    dim = len(open(path_Wemb, 'r').readline().split(' ')) - 1
 
     n_notsupported = n_vocab - count
     rand_vecs = (np.random.random((n_notsupported, dim)) - 0.5) * 0.01

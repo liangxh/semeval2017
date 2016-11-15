@@ -9,13 +9,12 @@ import os
 import sys
 import re
 import types
-import data_manager
-
+from common import data_manager
 
 def clean():
     """$ ./routine.py clean"""
 
-    import data_cleaner
+    from common import data_cleaner
     
     for root, dirs, files in os.walk(data_manager.DIR_RAW):
         for fname in files:
@@ -32,7 +31,7 @@ def countword():
         print "required arguments: KEY_SUBTASK"
         return
 
-    import wordcount
+    from util import wordcount
 
     key_subtask = sys.argv[2].upper()
 

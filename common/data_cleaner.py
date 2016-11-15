@@ -4,7 +4,7 @@
 @created: 2016.11.13
 """
 
-import tweet
+from util import tweet
 
 def clean(input_fname, output_fname):
     f = open(output_fname, 'w')

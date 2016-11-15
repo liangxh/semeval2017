@@ -5,10 +5,10 @@
 @created: 2016.11.14
 """
 
+from util import tokenizer
+from util.indexer import Indexer
 
-import tokenizer
 import data_manager
-from indexer import Indexer
 
 def get_label_indexer(key_subtask):
     if key_subtask == 'A':
