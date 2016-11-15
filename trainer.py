@@ -4,67 +4,68 @@
 @author: xiwen zhao
 @created: 2016.11.15
 """
+
+import numpy as np
+np.random.seed(1337)  # for reproducibility
+
 from common import data_manager, input_adapter, wordembed
 from prepare_data import prepare_dataset, prepare_input
 
-import numpy as np
-# np.random.seed(1337)  # for reproducibility
+class BaseTrainer:
+    def __init__(self, options):
+        self.key_subtask = options.key_subtask
+        self.fname_Wemb = options.fname_Wemb
+        self.nb_epoch = 20
+        self.batch_size = 32
+        self.input_length = 45
 
-# set parameters for input
-key_subtask = 'A'
-wemb_file = 'glove.twitter.27B.25d.txt'
+        self.set_model_config(options)
 
-# set parameters for training
-nb_epoch = 20
-batch_size = 32
-input_length = 45
 
-# load data from files
-print 'Loading data...'
+    def set_model_config(self, options):
+        raise NotImplementedError
 
-vocabs = data_manager.read_vocabs(key_subtask)
-dataset = prepare_dataset(key_subtask, vocabs)
-train, valid, test = map(lambda dset: prepare_input(dset, input_length), dataset)
 
-# set weights for building model
-weights = dict(
-    Wemb = wordembed.get(vocabs, wemb_file),
-)
-# weights['Wemb'].shape == (5635, 25)
+    def build_model(self, config, weights):
+        raise NotImplementedError
 
-# set parameters for building model according to dataset and weights
-config = dict(
-    # parameters related to the dataset
-    nb_classes = len(set(dataset[0][1])),  # use set() to filter repetitive classes
-    max_features = len(vocabs),
-    input_length = input_length,
-    embedding_dims = weights['Wemb'].shape[1],
 
-    # CNN
-    nb_filter = 250,
-    filter_length = 3,
-    hidden_dims = 250,
-)
+    def train(self):
+        # load data from files
+        print 'Loading data...'
+        vocabs = data_manager.read_vocabs(self.key_subtask)
+        dataset = prepare_dataset(self.key_subtask, vocabs)
+        train, valid, test = map(
+                    lambda dset: prepare_input(dset, self.input_length),
+                    dataset)
 
-print 'Build CNN model...'
-from model import cnn as Model
-model = Model.build(config, weights)
+        # set weights for building model
+        weights = dict(
+            Wemb = wordembed.get(vocabs, self.fname_Wemb),
+        )
+        
+        # set parameters for building model according to dataset and weights
+        self.config.update(dict(
+            nb_classes = len(set(dataset[0][1])),  # use set() to filter repetitive classes
+            max_features = len(vocabs),
+            input_length = self.input_length,
+            embedding_dims = weights['Wemb'].shape[1],
+        ))
+        
+        self.model = self.build_model(self.config, weights)
 
-model.fit(
-    train[0], train[1],
-    batch_size = batch_size,
-    nb_epoch = nb_epoch,
-    validation_data = valid
-)
+        self.model.fit(
+            train[0], train[1],
+            batch_size = self.batch_size,
+            nb_epoch = self.nb_epoch,
+            validation_data = valid
+        )
 
-score, acc = model.evaluate(
-                test[0], test[1],
-                batch_size = batch_size,
-            )
+        score, acc = self.model.evaluate(
+                        test[0], test[1],
+                        batch_size = batch_size,
+                    )
 
-print 'Test accuracy:', acc
-'''
-loss='binary_crossentropy' optimizer = 'adam'  0.71358
-loss='binary_crossentropy' optimizer = 'sgd'  0.72955
-loss='binary_crossentropy' optimizer = sgd  0.74354 -- lr=0.01, decay=1e-6, momentum=0.9, nesterov=False
-'''
+        print 'Test accuracy:', acc
+
+

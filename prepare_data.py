@@ -1,11 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+@author: xiwen zhao
+@created: 2016.11.15
+"""
+
 from keras.utils import np_utils
 from keras.preprocessing import sequence
 
 from common import data_manager, input_adapter, wordembed
-
-import numpy as np
-# np.random.seed(1337)  # for reproducibility
-
 
 def prepare_dataset(key_subtask, vocabs):
     text_indexer = input_adapter.get_text_indexer(vocabs)
