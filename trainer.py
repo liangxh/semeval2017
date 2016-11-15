@@ -4,35 +4,11 @@
 @author: xiwen zhao
 @created: 2016.11.15
 """
-
-
-from keras.utils import np_utils
-from keras.preprocessing import sequence
-
 from common import data_manager, input_adapter, wordembed
+from prepare_data import prepare_dataset, prepare_input
 
 import numpy as np
 # np.random.seed(1337)  # for reproducibility
-
-
-def prepare_dataset(key_subtask, vocabs):
-    text_indexer = input_adapter.get_text_indexer(vocabs)
-    label_indexer = input_adapter.get_label_indexer(key_subtask)
-
-    def prepare_dataset(mode):  # 函数里定义函数?
-        texts_labels = data_manager.read_texts_labels(key_subtask, mode)
-        x, y = input_adapter.adapt_texts_labels(texts_labels, text_indexer, label_indexer)
-        return x, y
-
-    dataset = tuple([prepare_dataset(mode) for mode in ['train', 'dev', 'devtest']])
-
-    return dataset
-
-def prepare_input(xy, input_length):
-    x, y = xy
-    x = sequence.pad_sequences(x, maxlen = input_length)
-    y = np_utils.to_categorical(y)
-    return x, y
 
 # set parameters for input
 key_subtask = 'A'
@@ -51,7 +27,6 @@ dataset = prepare_dataset(key_subtask, vocabs)
 train, valid, test = map(lambda dset: prepare_input(dset, input_length), dataset)
 
 # set weights for building model
-# why convert to dict???
 weights = dict(
     Wemb = wordembed.get(vocabs, wemb_file),
 )
@@ -71,7 +46,7 @@ config = dict(
     hidden_dims = 250,
 )
 
-print 'Build model...'
+print 'Build CNN model...'
 from model import cnn as Model
 model = Model.build(config, weights)
 
