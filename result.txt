@@ -1,0 +1,4 @@
+cnn loss='binary_crossentropy'  optimizer = 'adam'  0.71358
+cnn loss='binary_crossentropy'  optimizer = 'sgd'   0.72955
+cnn loss='binary_crossentropy'  optimizer = sgd(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)  0.74354
+grnn    loss='binary_crossentropy'  optimizer = 'adam'  0.73782

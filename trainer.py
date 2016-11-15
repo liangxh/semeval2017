@@ -63,8 +63,3 @@ score, acc = model.evaluate(
             )
 
 print 'Test accuracy:', acc
-'''
-loss='binary_crossentropy' optimizer = 'adam'  0.71358
-loss='binary_crossentropy' optimizer = 'sgd'  0.72955
-loss='binary_crossentropy' optimizer = sgd  0.74354 -- lr=0.01, decay=1e-6, momentum=0.9, nesterov=False
-'''
