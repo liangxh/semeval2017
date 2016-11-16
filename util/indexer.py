@@ -24,13 +24,16 @@ class Indexer:
         return self._inv.get(label, None)
 
     def label(self, idx):
+        if isinstance(idx, list):
+            return [self._labels[i] if i < self._n_label else None for i in idx]
+
         return self._labels[idx] if idx < self._n_label else None
 
 
 def test():
     indexer = Indexer(list('ABC'))
     print indexer.idx('B')
-    print indexer.label(2)
+    print indexer.label([1, 2, 2, 1])
 
 if __name__ == '__main__':
     test()
