@@ -55,16 +55,13 @@ class BaseTrainer:
         self.model = self.build_model(self.config, weights)
 
         self.model.fit(
-            train[0], train[1],
+            *train,
             batch_size = self.batch_size,
             nb_epoch = self.nb_epoch,
             validation_data = valid
         )
 
-        score, acc = self.model.evaluate(
-                        test[0], test[1],
-                        batch_size = batch_size,
-                    )
+        score, acc = self.model.evaluate(*test, batch_size = self.batch_size)
 
         print 'Test accuracy:', acc
 
