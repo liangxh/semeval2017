@@ -15,7 +15,7 @@ def clean(input_fname, output_fname):
             continue
 
         items[-1] = tweet.preprocess(items[-1])
-        f.write('\t'.join(items[1:])+'\n')
+        f.write('\t'.join(items)+'\n')
     f.close()
 
 

@@ -3,16 +3,16 @@ import numpy as np
 np.random.seed(1337)  # for reproducibility
 
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Embedding
+from keras.layers import Dense, Dropout, Activation, Embedding, Merge
 from keras.layers import LSTM, SimpleRNN, GRU
 from prepare_data import prepare_dataset, prepare_input
-from common import data_manager, wordembed
+from common import data_manager, wordembed, input_adapter
 
 max_features = 20000
 input_length = 45
 batch_size = 32
 
-key_subtask = 'A'
+key_subtask = 'C'
 wemb_file = 'glove.twitter.27B.25d.txt'
 
 print('Loading data...')
@@ -31,6 +31,9 @@ config = dict(
     input_length = input_length,
     embedding_dims = weights['Wemb'].shape[1],
 
+    nb_filter = 250,
+    filter_length = 3,
+    hidden_dims = 250,
 )
 
 print('Build GRNN model...')
@@ -41,6 +44,7 @@ model.add(Embedding(config['max_features'],
                         weights = [weights['Wemb']] if 'Wemb' in weights else None,
                         dropout = 0.2))
 model.add(GRU(128, dropout_W=0.2, dropout_U=0.2))
+
 # model.add(Dense(1))
 model.add(Dense(config['nb_classes']))
 model.add(Activation('sigmoid'))
@@ -49,11 +53,56 @@ model.compile(loss='binary_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 
-print('Train...')
-model.fit(train[0], train[1], batch_size=batch_size, nb_epoch=15,
-          validation_data=valid)
+print('Train grnn...')
+model.fit(train[0], train[1], batch_size=batch_size, nb_epoch=15, validation_data=valid)
 
-score, acc = model.evaluate(test[0], test[1],
-                            batch_size=batch_size)
+from cnn import main
+model_cnn = main()
+
+# merged model
+merged_model = Sequential()
+merged_model.add(Merge([model, model_cnn], mode='concat', concat_axis=1))
+
+merged_model.add(Dense(config['nb_classes']))
+merged_model.add(Activation('softmax'))
+
+merged_model.compile(loss='binary_crossentropy',
+              optimizer='adam',
+              metrics=['accuracy'])
+
+print('Train merged_model...')
+merged_model.fit([train[0], train[0]], train[1],
+                 batch_size=batch_size, nb_epoch=15,
+                 validation_data=[[valid[0],valid[0]],valid[1]]
+                 )
+
+score, acc = merged_model.evaluate([test[0], test[0]], test[1],
+                           batch_size=batch_size)
 
 print('Test accuracy:', acc)
+
+pred_classes = merged_model.predict_classes([test[0], test[0]], batch_size=batch_size, verbose=1)
+
+tweet_id = []
+tweet_topic = []
+tweet_label = []
+tweet_id_topic_label = data_manager.read_id_topic_label(key_subtask) # subtask BC
+# tweet_id_label = data_manager.read_id_label(key_subtask)  # subtask A
+
+for item in tweet_id_topic_label:
+    tweet_id.append(item[0])
+    tweet_topic.append(item[1])
+    tweet_label.append(item[2])
+
+f_pred = open('pred_resultC.txt', 'w')
+
+for t_id, t_topic, result in zip(tweet_id, tweet_topic, pred_classes):
+    indexer = input_adapter.get_label_indexer(key_subtask)
+    f_pred.write(t_id + '\t' + t_topic + '\t' + indexer.label(result) + '\n')
+f_pred.close()
+
+f_gold = open('gold_resultC.txt', 'w')
+
+for t_id, t_topic, t_label in zip(tweet_id, tweet_topic, tweet_label):
+    f_gold.write(t_id + '\t' + t_topic + '\t' + t_label + '\n')
+f_gold.close()

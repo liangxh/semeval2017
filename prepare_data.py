@@ -13,7 +13,7 @@ def prepare_dataset(key_subtask, vocabs):
     text_indexer = input_adapter.get_text_indexer(vocabs)
     label_indexer = input_adapter.get_label_indexer(key_subtask)
 
-    def prepare_dataset(mode):  # 函数里定义函数?
+    def prepare_dataset(mode):
         texts_labels = data_manager.read_texts_labels(key_subtask, mode)
         x, y = input_adapter.adapt_texts_labels(texts_labels, text_indexer, label_indexer)
         return x, y
@@ -24,6 +24,6 @@ def prepare_dataset(key_subtask, vocabs):
 
 def prepare_input(xy, input_length):
     x, y = xy
-    x = sequence.pad_sequences(x, maxlen = input_length)
+    x = sequence.pad_sequences(x, maxlen = input_length)  # pad 0 before tweets
     y = np_utils.to_categorical(y)
     return x, y
