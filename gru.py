@@ -1,59 +1,65 @@
-from __future__ import print_function
-import numpy as np
-np.random.seed(1337)  # for reproducibility
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@author: xiwen zhao
+@created: 2016.11.17
+"""
+
+from optparse import OptionParser
+from trainer import BaseTrainer
+from common import data_manager
 
 from keras.models import Sequential
-from keras.layers import Dense, Dropout, Activation, Embedding
-from keras.layers import LSTM, SimpleRNN, GRU
-from prepare_data import prepare_dataset, prepare_input
-from common import data_manager, wordembed
+from keras.layers import Dense, Dropout, Activation
+from keras.layers import Embedding
+from keras.layers import GRU
+from keras.optimizers import SGD
 
-max_features = 20000
-input_length = 45
-batch_size = 32
+class Trainer(BaseTrainer):
+    def set_model_config(self, options):
+        self.config = dict(
+            nb_filter = options.nb_filter,
+            filter_length = options.filter_length,
+            hidden_dims = options.hidden_dims,
+        )
 
-key_subtask = 'A'
-wemb_file = 'glove.twitter.27B.25d.txt'
+    def build_model(self, config, weights):
+        print 'Build grnn model...'
+        model = Sequential()
+        model.add(Embedding(config['max_features'],
+                                config['embedding_dims'],
+                                input_length = config['input_length'],
+                                weights = [weights['Wemb']] if 'Wemb' in weights else None,
+                                dropout = 0.2))
+        model.add(GRU(128, dropout_W=0.2, dropout_U=0.2))
 
-print('Loading data...')
-vocabs = data_manager.read_vocabs(key_subtask)
-dataset = prepare_dataset(key_subtask, vocabs)
-train, valid, test = map(lambda dset: prepare_input(dset, input_length), dataset)
+        # model.add(Dense(1))
+        model.add(Dense(config['nb_classes']))
+        model.add(Activation('sigmoid'))
 
-weights = dict(
-    Wemb = wordembed.get(vocabs, wemb_file),
-)
+        model.compile(loss='binary_crossentropy',
+                      optimizer='adam',
+                      metrics=['accuracy'])
 
-config = dict(
-    # parameters related to the dataset
-    nb_classes = len(set(dataset[0][1])),  # use set() to filter repetitive classes
-    max_features = len(vocabs),
-    input_length = input_length,
-    embedding_dims = weights['Wemb'].shape[1],
+        return model
 
-)
 
-print('Build GRNN model...')
-model = Sequential()
-model.add(Embedding(config['max_features'],
-                        config['embedding_dims'],
-                        input_length = config['input_length'],
-                        weights = [weights['Wemb']] if 'Wemb' in weights else None,
-                        dropout = 0.2))
-model.add(GRU(128, dropout_W=0.2, dropout_U=0.2))
-# model.add(Dense(1))
-model.add(Dense(config['nb_classes']))
-model.add(Activation('sigmoid'))
+def main():
+    optparser = OptionParser()
+    optparser.add_option("-t", "--task", dest = "key_subtask", default = "B")
+    optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.25d.txt")
+    optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
+    optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 250)
+    optparser.add_option("-l", "--filter_length", dest = "filter_length", type = "int", default = 3)
+    opts, args = optparser.parse_args()
 
-model.compile(loss='binary_crossentropy',
-              optimizer='adam',
-              metrics=['accuracy'])
+    trainer = Trainer(opts)
+    model = trainer.train()
+    
+    test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
+    trainer.evaluate(test)
 
-print('Train...')
-model.fit(train[0], train[1], batch_size=batch_size, nb_epoch=15,
-          validation_data=valid)
 
-score, acc = model.evaluate(test[0], test[1],
-                            batch_size=batch_size)
+if __name__ == '__main__':
+    main()
 
-print('Test accuracy:', acc)

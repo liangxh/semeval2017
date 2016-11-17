@@ -67,6 +67,32 @@ def read_texts_labels(key_subtask, mode):
     return map(lambda k: (k[-1], k[-2]), lines)
 
 
+def read_id_label(key_subtask):  # only for subtask A
+    fname = fname_clean(key_subtask, 'devtest')
+    lines = open(fname, 'r').readlines()
+    id_label = []
+    for line in lines:
+        if line == '': continue
+
+        params = line.strip().split('\t')
+        id_label.append((params[0], params[1]))
+
+    return id_label
+
+
+def read_id_topic_label(key_subtask):  # for subtask B, C, D, E
+    fname = fname_clean(key_subtask, 'devtest')
+    lines = open(fname, 'r').readlines()
+    id_topic_label = []
+    for line in lines:
+        if line == '': continue
+
+        params = line.strip().split('\t')
+        id_topic_label.append((params[0], params[1], params[2]))
+
+    return id_topic_label
+
+
 def read_wordcount(key_subtask):
     fname = fname_wordcount(key_subtask)
     lines = open(fname, 'r').readlines()

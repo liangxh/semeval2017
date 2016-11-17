@@ -54,6 +54,7 @@ class Trainer(BaseTrainer):
 
         return model
 
+
 def main():
     optparser = OptionParser()
     optparser.add_option("-t", "--task", dest = "key_subtask", default = "A")
@@ -66,8 +67,9 @@ def main():
     trainer = Trainer(opts)
     trainer.train()
 
-    test = data_manager.read_texts_labels(opts['key_subtask'], 'devtest')
+    test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
     trainer.evaluate(test)
+
 
 if __name__ == '__main__':
     main() 
