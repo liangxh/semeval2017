@@ -1,11 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-@author: 
-@created: 
+@author: xiwen zhao
+@created: 2016.11.18
 """
-
-# TODO(zxw) nice Friday isn't it? fill in the header then .__.
 
 
 from optparse import OptionParser
@@ -24,7 +22,6 @@ class Trainer(BaseTrainer):
     def post_prepare_X(self, x):
         return [x for i in range(2)]
 
-
     def set_model_config(self, options):
         self.config = dict(        
             nb_filter = options.nb_filter,
@@ -32,18 +29,18 @@ class Trainer(BaseTrainer):
             hidden_dims = options.hidden_dims,
         )
 
-
     def build_model(self, config, weights):
         # TODO(zxw) build model according to the paper
         # TODO(zxw) make the options controllable
 
         gru_model = Sequential()
+        print config
         gru_model.add(Embedding(config['max_features'],
                                 config['embedding_dims'],
                                 input_length = config['input_length'],
-                                weights = [weights['Wemb']] if 'Wemb' in weights else None,
-                                dropout = 0.2))
-        gru_model.add(GRU(128, dropout_W=0.2, dropout_U=0.2))
+                                weights = [weights['Wemb']] if 'Wemb' in weights else None))
+                                #dropout = 0.2))
+        gru_model.add(GRU(100, dropout_W=0.2, dropout_U=0.2))
         #gru_model.add(Dense(config['hidden_dims']))
         #gru_model.add(Activation('sigmoid'))
 
@@ -51,8 +48,8 @@ class Trainer(BaseTrainer):
         cnn_model.add(Embedding(config['max_features'],
                                 config['embedding_dims'],
                                 input_length = config['input_length'],
-                                weights = [weights['Wemb']] if 'Wemb' in weights else None,
-                                dropout = 0.2))
+                                weights = [weights['Wemb']] if 'Wemb' in weights else None))
+                                #dropout = 0.2))
 
         cnn_model.add(Convolution1D(nb_filter = config['nb_filter'],
                                 filter_length = config['filter_length'],
@@ -68,6 +65,7 @@ class Trainer(BaseTrainer):
         merged_model = Sequential()
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
+        merged_model.add(Dropout(0.25))
         merged_model.add(Dense(config['nb_classes']))
         merged_model.add(Activation('softmax'))
 
@@ -83,7 +81,7 @@ def main():
     optparser.add_option("-t", "--task", dest = "key_subtask", default = "A")
     optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.25d.txt")
     optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
-    optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 250)
+    optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 100)
     optparser.add_option("-l", "--filter_length", dest = "filter_length", type = "int", default = 3)
     opts, args = optparser.parse_args()
 

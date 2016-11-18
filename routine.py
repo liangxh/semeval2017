@@ -40,28 +40,6 @@ def countword():
         output_fname = data_manager.fname_wordcount(key_subtask)
         wordcount.export(wordcount.count(texts).items(), output_fname)
 
-
-def filterwemb():
-    """$ ./routine.py filterwemb WEMB_INPUT"""
-
-    if len(sys.argv) < 2:
-        print "required arguments: WEMB_INPUT"
-        return
-
-    fname_input = sys.argv[2]
-    fname_output = os.path.join(data_manager.DIR_WEMB, fname_input.split('/')[-1]) + '.trim'
-
-    if os.path.exists(fname_output):
-        res = raw_input("output file %s exists, cover it anyway? (y/n): "%(fname_output))
-        if not res == 'y':
-            return
-
-    vocabs = data_manager.read_vocabs('A')
-
-    from common import wembfilter
-    wembfilter.filter(fname_input, fname_output, vocabs)
-
-
 funcs = {}
 for name in dir():
     if not name.startswith('_'): # not builtin-functions

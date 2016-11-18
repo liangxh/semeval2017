@@ -35,7 +35,6 @@ class Indexer:
     def labels(self):
         return self._labels
 
-
 def test():
     indexer = Indexer(list('ABC'))
     print indexer.idx('B')

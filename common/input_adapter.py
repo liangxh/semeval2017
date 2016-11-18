@@ -8,6 +8,7 @@
 import data_manager
 from util.indexer import Indexer
 
+
 def get_label_indexer(key_subtask):
     if key_subtask == 'A':
         return Indexer(['negative', 'neutral', 'positive'])
