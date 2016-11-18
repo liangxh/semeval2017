@@ -19,7 +19,7 @@ class BaseTrainer:
     def __init__(self, options):
         self.key_subtask = options.key_subtask
         self.fname_Wemb = options.fname_Wemb
-        self.nb_epoch = 1
+        self.nb_epoch = 15
         self.batch_size = 32
         self.input_length = 45
 

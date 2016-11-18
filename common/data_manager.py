@@ -191,7 +191,7 @@ def write_topic_label(key_subtask, pred_classes):  # for subtask D
     f_pred.close()
 
 
-def write_topic_5labels(key_subtask, pred_classes):
+def write_topic_5labels(key_subtask, pred_classes):  # for subtask E
     fname = fname_clean(key_subtask, 'devtest')
     lines = open(fname, 'r').readlines()
     topic_label = []
@@ -225,31 +225,18 @@ def write_topic_5labels(key_subtask, pred_classes):
             elif label == '1':
                 pos += 1
             else: hpos += 1
-        '''
-        hn = round(float(hneg) / tweet_num, 12)
-        n = round(float(neg) / tweet_num, 12)
-        u = round(float(neu) / tweet_num, 12)
-        p = round(float(pos) / tweet_num, 12)
-        prob[topic] = (hn, n, u, p, round(1. - hn - n - u - p, 12))
 
-    f_gold = open('../data/result/gold_result%s.txt' % key_subtask, 'w')
-
-    for t_topic, t_gold_prob in prob.items():
-        f_gold.write(t_topic + '\t' + str(t_gold_prob[0]) + '\t' + str(t_gold_prob[1]) + '\t' +
-                     str(t_gold_prob[2]) + '\t' + str(t_gold_prob[3]) + '\t' + str(t_gold_prob[4]) + '\t' +
-                     str(len(dict_topic.get(t_topic, -1))) + '\n')
-    f_gold.close()
-    '''
         hn = float(hneg) / tweet_num
         n = float(neg) / tweet_num
         u = float(neu) / tweet_num
         p = float(pos) / tweet_num
-        prob[topic] = (hn, n, u, p, 1. - hn - n - u - p, 12)
+        hp = float(hpos) / tweet_num
+        prob[topic] = (hn, n, u, p, hp)
 
     f_gold = open('../data/result/gold_result%s.txt' % key_subtask, 'w')
 
     for t_topic, t_gold_prob in prob.items():
-        line ='%s\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\t%d\n'%(t_topic, t_gold_prob[0], t_gold_prob[1], t_gold_prob[2],
+        line ='%s\t%.12f\t%.12f\t%.12f\t%.12f\t%.12f\t%d\n'%(t_topic, t_gold_prob[0], t_gold_prob[1], t_gold_prob[2],
                                                     t_gold_prob[3], t_gold_prob[4], len(dict_topic.get(t_topic, -1)))
         f_gold.write(line)
     f_gold.close()
@@ -270,31 +257,18 @@ def write_topic_5labels(key_subtask, pred_classes):
         pos = len([None for label in labels if label == 3])
         hpos = len([None for label in labels if label == 4])
 
-        '''
-        hn = round(float(hneg) / len(labels), 12)
-        n = round(float(neg) / len(labels), 12)
-        u = round(float(neu) / len(labels), 12)
-        p = round(float(pos) / len(labels), 12)
-        prob[topic] = (hn, n, u, p, round(1. - hn - n - u - p), 12)
-
-    f_pred = open('../data/result/pred_result%s.txt' % key_subtask, 'w')
-
-    for t_topic, t_pred_prob in prob.items():
-        f_pred.write(t_topic + '\t' + str(t_pred_prob[0]) + '\t' + str(t_pred_prob[1]) + '\t' +
-                     str(t_pred_prob[2]) + '\t' + str(t_pred_prob[3]) + '\t' + str(t_pred_prob[4]) + '\n')
-    f_pred.close()
-    '''
         hn = float(hneg) / len(labels)
         n = float(neg) / len(labels)
         u = float(neu) / len(labels)
         p = float(pos) / len(labels)
-        prob[topic] = (hn, n, u, p, 1. - hn - n - u - p)
+        hp = float(hpos) / len(labels)
+        prob[topic] = (hn, n, u, p, hp)
 
     f_pred = open('../data/result/pred_result%s.txt' % key_subtask, 'w')
 
     for t_topic, t_pred_prob in prob.items():
-        line ='%s\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\n'%(t_topic, t_gold_prob[0], t_gold_prob[1], t_gold_prob[2],
-                                                    t_gold_prob[3], t_gold_prob[4])
+        line ='%s\t%.12f\t%.12f\t%.12f\t%.12f\t%.12f\n'%(t_topic, t_pred_prob[0], t_pred_prob[1], t_pred_prob[2],
+                                                    t_pred_prob[3], t_pred_prob[4])
         f_pred.write(line)
     f_pred.close()
 
