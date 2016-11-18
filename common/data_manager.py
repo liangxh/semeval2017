@@ -15,6 +15,7 @@ DIR_WORDCOUNT = os.path.join(DIR_DATA, 'wordcount')
 DIR_COMMON = os.path.join(DIR_DATA, 'common')
 DIR_WEMB = os.path.join(DIR_DATA, 'wemb')
 
+
 def unify_subtask_key(key):
     key = key.upper()
 
@@ -117,17 +118,185 @@ def write_id_topic_label(key_subtask, pred_classes):  # for subtask B, C
             tweet_topic.append(item[1])
             tweet_label.append(item[2])
 
-    f_pred = open('pred_result%s.txt' % key_subtask, 'w')
+    f_pred = open('../data/result/pred_result%s.txt' % key_subtask, 'w')
 
     for t_id, t_topic, result in zip(tweet_id, tweet_topic, pred_classes):
         f_pred.write(t_id + '\t' + t_topic + '\t' + input_adapter.get_label_indexer(key_subtask).label(result) + '\n')
     f_pred.close()
 
-    f_gold = open('gold_result%s.txt' % key_subtask, 'w')
+    f_gold = open('../data/result/gold_result%s.txt' % key_subtask, 'w')
 
     for t_id, t_topic, t_label in zip(tweet_id, tweet_topic, tweet_label):
         f_gold.write(t_id + '\t' + t_topic + '\t' + t_label + '\n')
     f_gold.close()
+
+
+def write_topic_label(key_subtask, pred_classes):  # for subtask D
+    fname = fname_clean(key_subtask, 'devtest')
+    lines = open(fname, 'r').readlines()
+    topic_label = []
+    for line in lines:
+        if line == '': continue
+
+        params = line.strip().split('\t')
+        topic_label.append((params[1], params[2]))
+
+    topics = map(lambda k:k[0],topic_label)
+
+    dict_topic = {}  # dict: topic --> [labels in devtest]
+    for item in topic_label:
+        if item[0] in dict_topic:
+            dict_topic[item[0]].append(item[1])
+        else:
+            dict_topic[item[0]] = [item[1], ]
+
+    # gold file
+    prob = {}  # dict of topic and relative probabilities in devtest (gold file)
+    for topic in dict_topic.keys():
+        pos = 0
+        tweet_num = len(dict_topic.get(topic, -1))
+        for label in dict_topic.get(topic, -1):
+            if label == 'positive':
+                pos += 1
+
+        p = round(float(pos) / tweet_num, 12)
+        prob[topic] = (p, 1. - p)
+
+    f_gold = open('../data/result/gold_result%s.txt' % key_subtask, 'w')
+
+    for t_topic, t_gold_prob in prob.items():
+        f_gold.write(t_topic + '\t' + str(t_gold_prob[0]) + '\t' + str(t_gold_prob[1]) + '\t' +
+                     str(len(dict_topic.get(t_topic, -1))) + '\n')
+    f_gold.close()
+
+    # prediction file
+    dict_topic = {}
+    for topic, pred_class in zip(topics, pred_classes):
+        if topic in dict_topic:
+            dict_topic[topic].append(pred_class)
+        else:
+            dict_topic[topic] = [pred_class, ]
+
+    prob = {}  # dict of topic and relative probabilities in prediction file
+    for topic, labels in dict_topic.items():
+        pos = len([None for label in labels if label == 1])
+
+        p = float(pos) / len(labels)
+        prob[topic] = (p, 1. - p)
+
+    f_pred = open('../data/result/pred_result%s.txt' % key_subtask, 'w')
+
+    for t_topic, t_pred_prob in prob.items():
+        f_pred.write(t_topic + '\t' + str(t_pred_prob[0]) + '\t' + str(t_pred_prob[1]) + '\n')
+    f_pred.close()
+
+
+def write_topic_5labels(key_subtask, pred_classes):
+    fname = fname_clean(key_subtask, 'devtest')
+    lines = open(fname, 'r').readlines()
+    topic_label = []
+    for line in lines:
+        if line == '': continue
+
+        params = line.strip().split('\t')
+        topic_label.append((params[1], params[2]))
+
+    topics = map(lambda k:k[0], topic_label)
+
+    dict_topic = {}  # dict: topic --> [labels in devtest]
+    for item in topic_label:
+        if item[0] in dict_topic:
+            dict_topic[item[0]].append(item[1])
+        else:
+            dict_topic[item[0]] = [item[1], ]
+
+    # gold file
+    prob = {}  # dict of topic and relative probabilities in devtest (gold file)
+    for topic in dict_topic.keys():
+        hneg = neg = neu = pos = hpos = 0
+        tweet_num = len(dict_topic.get(topic, -1))
+        for label in dict_topic.get(topic, -1):
+            if label == '-2':
+                hneg += 1
+            elif label == '-1':
+                neg += 1
+            elif label == '0':
+                neu += 1
+            elif label == '1':
+                pos += 1
+            else: hpos += 1
+        '''
+        hn = round(float(hneg) / tweet_num, 12)
+        n = round(float(neg) / tweet_num, 12)
+        u = round(float(neu) / tweet_num, 12)
+        p = round(float(pos) / tweet_num, 12)
+        prob[topic] = (hn, n, u, p, round(1. - hn - n - u - p, 12))
+
+    f_gold = open('../data/result/gold_result%s.txt' % key_subtask, 'w')
+
+    for t_topic, t_gold_prob in prob.items():
+        f_gold.write(t_topic + '\t' + str(t_gold_prob[0]) + '\t' + str(t_gold_prob[1]) + '\t' +
+                     str(t_gold_prob[2]) + '\t' + str(t_gold_prob[3]) + '\t' + str(t_gold_prob[4]) + '\t' +
+                     str(len(dict_topic.get(t_topic, -1))) + '\n')
+    f_gold.close()
+    '''
+        hn = float(hneg) / tweet_num
+        n = float(neg) / tweet_num
+        u = float(neu) / tweet_num
+        p = float(pos) / tweet_num
+        prob[topic] = (hn, n, u, p, 1. - hn - n - u - p, 12)
+
+    f_gold = open('../data/result/gold_result%s.txt' % key_subtask, 'w')
+
+    for t_topic, t_gold_prob in prob.items():
+        line ='%s\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\t%d\n'%(t_topic, t_gold_prob[0], t_gold_prob[1], t_gold_prob[2],
+                                                    t_gold_prob[3], t_gold_prob[4], len(dict_topic.get(t_topic, -1)))
+        f_gold.write(line)
+    f_gold.close()
+
+    # prediction file
+    dict_topic = {}
+    for topic, pred_class in zip(topics, pred_classes):
+        if topic in dict_topic:
+            dict_topic[topic].append(pred_class)
+        else:
+            dict_topic[topic] = [pred_class, ]
+
+    prob = {}  # dict of topic and relative probabilities in prediction file
+    for topic, labels in dict_topic.items():
+        hneg = len([None for label in labels if label == 0])
+        neg = len([None for label in labels if label == 1])
+        neu = len([None for label in labels if label == 2])
+        pos = len([None for label in labels if label == 3])
+        hpos = len([None for label in labels if label == 4])
+
+        '''
+        hn = round(float(hneg) / len(labels), 12)
+        n = round(float(neg) / len(labels), 12)
+        u = round(float(neu) / len(labels), 12)
+        p = round(float(pos) / len(labels), 12)
+        prob[topic] = (hn, n, u, p, round(1. - hn - n - u - p), 12)
+
+    f_pred = open('../data/result/pred_result%s.txt' % key_subtask, 'w')
+
+    for t_topic, t_pred_prob in prob.items():
+        f_pred.write(t_topic + '\t' + str(t_pred_prob[0]) + '\t' + str(t_pred_prob[1]) + '\t' +
+                     str(t_pred_prob[2]) + '\t' + str(t_pred_prob[3]) + '\t' + str(t_pred_prob[4]) + '\n')
+    f_pred.close()
+    '''
+        hn = float(hneg) / len(labels)
+        n = float(neg) / len(labels)
+        u = float(neu) / len(labels)
+        p = float(pos) / len(labels)
+        prob[topic] = (hn, n, u, p, 1. - hn - n - u - p)
+
+    f_pred = open('../data/result/pred_result%s.txt' % key_subtask, 'w')
+
+    for t_topic, t_pred_prob in prob.items():
+        line ='%s\t%.8f\t%.8f\t%.8f\t%.8f\t%.8f\n'%(t_topic, t_gold_prob[0], t_gold_prob[1], t_gold_prob[2],
+                                                    t_gold_prob[3], t_gold_prob[4])
+        f_pred.write(line)
+    f_pred.close()
 
 
 def read_wordcount(key_subtask):

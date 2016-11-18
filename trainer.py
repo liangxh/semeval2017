@@ -19,7 +19,7 @@ class BaseTrainer:
     def __init__(self, options):
         self.key_subtask = options.key_subtask
         self.fname_Wemb = options.fname_Wemb
-        self.nb_epoch = 15
+        self.nb_epoch = 1
         self.batch_size = 32
         self.input_length = 45
 
@@ -90,7 +90,6 @@ class BaseTrainer:
             validation_data = valid
         )
 
-
     def evaluate(self, test):
         """
         Args
@@ -106,5 +105,8 @@ class BaseTrainer:
 
         elif self.key_subtask == 'B' or self.key_subtask == 'C':
             data_manager.write_id_topic_label(self.key_subtask, pred_classes)
+        elif self.key_subtask == 'D':
+            data_manager.write_topic_label(self.key_subtask, pred_classes)
         else:
-            None
+            data_manager.write_topic_5labels(self.key_subtask, pred_classes)
+
