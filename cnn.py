@@ -7,6 +7,7 @@
 
 from optparse import OptionParser
 from trainer import BaseTrainer
+from common import data_manager
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation
@@ -54,6 +55,7 @@ class Trainer(BaseTrainer):
 
         return model
 
+
 def main():
     optparser = OptionParser()
     optparser.add_option("-t", "--task", dest = "key_subtask", default = "C")
@@ -66,6 +68,10 @@ def main():
     trainer = Trainer(opts)
     model = trainer.train()
     return model
+
+    test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
+    trainer.evaluate(test)
+
 
 if __name__ == '__main__':
     main() 

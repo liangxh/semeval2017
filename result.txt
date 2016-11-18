@@ -1,9 +1,0 @@
-cnn A   loss='binary_crossentropy'  optimizer = 'adam'  0.71358
-cnn A   loss='binary_crossentropy'  optimizer = 'sgd'   0.72955
-cnn A   loss='binary_crossentropy'  optimizer = adagrad(lr=0.01, epsilon=1e-06) 0.72600
-cnn A   loss='binary_crossentropy'  optimizer = sgd(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)  0.74354
-cnn B   loss='binary_crossentropy'  optimizer = rmsprop(lr=0.001, rho=0.9, epsilon=1e-06)   0.80916
-cnn B   loss='binary_crossentropy'  optimizer = adagrad(lr=0.01, epsilon=1e-06) 0.83375
-cnn C   loss='binary_crossentropy'  optimizer = 'adam'  0.80827
-cnn C   loss='binary_crossentropy'  optimizer = sgd(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)  0.82896
-grnn    A   loss='binary_crossentropy'  optimizer = 'adam'  0.73782

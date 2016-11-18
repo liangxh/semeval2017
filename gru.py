@@ -1,8 +1,16 @@
-from __future__ import print_function
-import numpy as np
-np.random.seed(1337)  # for reproducibility
+#! /usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+@author: xiwen zhao
+@created: 2016.11.17
+"""
+
+from optparse import OptionParser
+from trainer import BaseTrainer
+from common import data_manager
 
 from keras.models import Sequential
+<<<<<<< HEAD
 from keras.layers import Dense, Dropout, Activation, Embedding, Merge
 from keras.layers import LSTM, SimpleRNN, GRU
 from prepare_data import prepare_dataset, prepare_input
@@ -106,3 +114,58 @@ f_gold = open('gold_resultC.txt', 'w')
 for t_id, t_topic, t_label in zip(tweet_id, tweet_topic, tweet_label):
     f_gold.write(t_id + '\t' + t_topic + '\t' + t_label + '\n')
 f_gold.close()
+=======
+from keras.layers import Dense, Dropout, Activation
+from keras.layers import Embedding
+from keras.layers import GRU
+from keras.optimizers import SGD
+
+class Trainer(BaseTrainer):
+    def set_model_config(self, options):
+        self.config = dict(
+            nb_filter = options.nb_filter,
+            filter_length = options.filter_length,
+            hidden_dims = options.hidden_dims,
+        )
+
+    def build_model(self, config, weights):
+        print 'Build grnn model...'
+        model = Sequential()
+        model.add(Embedding(config['max_features'],
+                                config['embedding_dims'],
+                                input_length = config['input_length'],
+                                weights = [weights['Wemb']] if 'Wemb' in weights else None,
+                                dropout = 0.2))
+        model.add(GRU(128, dropout_W=0.2, dropout_U=0.2))
+
+        # model.add(Dense(1))
+        model.add(Dense(config['nb_classes']))
+        model.add(Activation('sigmoid'))
+
+        model.compile(loss='binary_crossentropy',
+                      optimizer='adam',
+                      metrics=['accuracy'])
+
+        return model
+
+
+def main():
+    optparser = OptionParser()
+    optparser.add_option("-t", "--task", dest = "key_subtask", default = "B")
+    optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.25d.txt")
+    optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
+    optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 250)
+    optparser.add_option("-l", "--filter_length", dest = "filter_length", type = "int", default = 3)
+    opts, args = optparser.parse_args()
+
+    trainer = Trainer(opts)
+    model = trainer.train()
+    
+    test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
+    trainer.evaluate(test)
+
+
+if __name__ == '__main__':
+    main()
+
+>>>>>>> 388be2bc55fc0c055325740718ff2f4a10dd2f18

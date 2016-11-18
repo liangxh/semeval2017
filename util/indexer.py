@@ -29,6 +29,12 @@ class Indexer:
 
         return self._labels[idx] if idx < self._n_label else None
 
+    def size(self):
+        return self._n_label
+
+    def labels(self):
+        return self._labels
+
 
 def test():
     indexer = Indexer(list('ABC'))
