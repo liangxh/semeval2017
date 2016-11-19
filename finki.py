@@ -49,7 +49,7 @@ class Trainer(BaseTrainer):
                                 config['embedding_dims'],
                                 input_length = config['input_length'],
                                 weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        blstm_model.add(Bidirectional(LSTM(100, dropout_W=0.2, dropout_U=0.2)))
+        blstm_model.add(Bidirectional(LSTM(100, dropout_W=0.25, dropout_U=0.25)))
 
         cnn_model = Sequential()
         cnn_model.add(Embedding(config['max_features'],
@@ -85,7 +85,7 @@ class Trainer(BaseTrainer):
 
 def main():
     optparser = OptionParser()
-    optparser.add_option("-t", "--task", dest = "key_subtask", default = "E")
+    optparser.add_option("-t", "--task", dest = "key_subtask", default = "D")
     optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.25d.txt")
     optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
     optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 100)
