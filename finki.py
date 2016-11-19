@@ -15,6 +15,7 @@ from keras.layers import Dense, Dropout, Activation, Embedding, Merge
 from keras.layers import LSTM, SimpleRNN, GRU
 from keras.layers import Embedding
 from keras.layers import Convolution1D, GlobalMaxPooling1D
+from keras.layers.wrappers import Bidirectional
 from keras.optimizers import SGD
 
 
@@ -43,6 +44,13 @@ class Trainer(BaseTrainer):
         #gru_model.add(Dense(config['hidden_dims']))
         #gru_model.add(Activation('sigmoid'))
 
+        blstm_model = Sequential()
+        blstm_model.add(Embedding(config['max_features'],
+                                config['embedding_dims'],
+                                input_length = config['input_length'],
+                                weights = [weights['Wemb']] if 'Wemb' in weights else None))
+        blstm_model.add(Bidirectional(LSTM(100, dropout_W=0.2, dropout_U=0.2)))
+
         cnn_model = Sequential()
         cnn_model.add(Embedding(config['max_features'],
                                 config['embedding_dims'],
@@ -62,7 +70,7 @@ class Trainer(BaseTrainer):
 
         # merged model
         merged_model = Sequential()
-        merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
+        merged_model.add(Merge([blstm_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
         merged_model.add(Dense(config['nb_classes']))
