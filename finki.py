@@ -20,6 +20,9 @@ from keras.optimizers import RMSprop, SGD
 
 
 class Trainer(BaseTrainer):
+    def get_model_name(self):
+        return __file__.split('/')[-1].split('.')[0]
+
     def post_prepare_X(self, x):
         return [x for i in range(2)]
 
@@ -106,6 +109,7 @@ def main():
 
     trainer = Trainer(opts)
     trainer.train()
+    trainer.load_model_weight()
 
     test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
     trainer.evaluate(test)

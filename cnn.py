@@ -16,6 +16,10 @@ from keras.layers import Convolution1D, GlobalMaxPooling1D
 from keras.optimizers import SGD
 
 class Trainer(BaseTrainer):
+    def get_model_name(self):
+        return __file__.split('/')[-1].split('.')[0]
+
+
     def set_model_config(self, options):
         self.config = dict(        
             nb_filter = options.nb_filter,

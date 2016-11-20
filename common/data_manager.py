@@ -14,6 +14,7 @@ DIR_CLEAN = os.path.join(DIR_DATA, 'clean')
 DIR_WORDCOUNT = os.path.join(DIR_DATA, 'wordcount')
 DIR_COMMON = os.path.join(DIR_DATA, 'common')
 DIR_WEMB = os.path.join(DIR_DATA, 'wemb')
+DIR_MODEL = os.path.join(DIR_DATA, 'model')
 
 
 def unify_subtask_key(key):
@@ -38,6 +39,13 @@ def fname_clean(key_subtask, mode):
 def fname_wordcount(key_subtask):
     key = unify_subtask_key(key_subtask)
     return os.path.join(DIR_WORDCOUNT, 'subtask%s.txt'%(key))
+
+def fname_model_weight(key_subtask, model_name):
+    return os.path.join(DIR_MODEL, 'subtask%s_%s_weight.hdf5'%(key_subtask, model_name))
+
+
+def fname_model_config(key_subtask, model_name):
+    return os.path.join(DIR_MODEL, 'subtask%s_%s_config.json'%(key_subtask, model_name))
 
 
 def read_data(key_subtask, mode):
