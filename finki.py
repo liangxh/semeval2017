@@ -28,6 +28,8 @@ class Trainer(BaseTrainer):
             nb_filter = options.nb_filter,
             filter_length = options.filter_length,
             hidden_dims = options.hidden_dims,
+            # dropout_W = options.dropout_W,  # TODO: How to add dropout?
+            # dropout_U = options.dropout_U,
         )
 
     def build_model(self, config, weights):
@@ -40,15 +42,15 @@ class Trainer(BaseTrainer):
                                 input_length = config['input_length'],
                                 weights = [weights['Wemb']] if 'Wemb' in weights else None))
                                 #dropout = 0.2))
-        gru_model.add(GRU(100, dropout_W=0.2, dropout_U=0.2))
-        #gru_model.add(Dense(config['hidden_dims']))
-        #gru_model.add(Activation('sigmoid'))
+        gru_model.add(GRU(100, dropout_W=0.25, dropout_U=0.25))
+        # gru_model.add(Dense(config['hidden_dims']))
+        # gru_model.add(Activation('sigmoid'))
 
         blstm_model = Sequential()
         blstm_model.add(Embedding(config['max_features'],
-                                config['embedding_dims'],
-                                input_length = config['input_length'],
-                                weights = [weights['Wemb']] if 'Wemb' in weights else None))
+                                  config['embedding_dims'],
+                                  input_length = config['input_length'],
+                                  weights = [weights['Wemb']] if 'Wemb' in weights else None))
         blstm_model.add(Bidirectional(LSTM(100, dropout_W=0.25, dropout_U=0.25)))
 
         cnn_model = Sequential()
@@ -59,14 +61,14 @@ class Trainer(BaseTrainer):
                                 #dropout = 0.2))
 
         cnn_model.add(Convolution1D(nb_filter = config['nb_filter'],
-                                filter_length = config['filter_length'],
-                                border_mode = 'valid',
-                                activation = 'relu',
-                                subsample_length = 1))
+                                    filter_length = config['filter_length'],
+                                    border_mode = 'valid',
+                                    activation = 'relu',
+                                    subsample_length = 1))
 
         cnn_model.add(GlobalMaxPooling1D())
-        #cnn_model.add(Dense(config['hidden_dims']))
-        #cnn_model.add(Activation('sigmoid'))
+        # cnn_model.add(Dense(config['hidden_dims']))
+        # cnn_model.add(Activation('sigmoid'))
 
         # merged model
         merged_model = Sequential()
@@ -77,19 +79,21 @@ class Trainer(BaseTrainer):
         merged_model.add(Activation('softmax'))
 
         merged_model.compile(loss='binary_crossentropy',
-                      optimizer='adam',
-                      metrics=['accuracy'])
+                             optimizer='adam',
+                             metrics=['accuracy'])
 
         return merged_model
 
 
 def main():
     optparser = OptionParser()
-    optparser.add_option("-t", "--task", dest = "key_subtask", default = "D")
+    optparser.add_option("-t", "--task", dest = "key_subtask", default = "E")
     optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.25d.txt")
     optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
     optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 100)
     optparser.add_option("-l", "--filter_length", dest = "filter_length", type = "int", default = 3)
+    # optparser.add_option("-w", "--dropout_W", dest = "dropout_W", type = "float", default = 0.25)
+    # optparser.add_option("-u", "--dropout_U", dest = "dropout_U", type = "float", default = 0.25)
     opts, args = optparser.parse_args()
 
     trainer = Trainer(opts)
