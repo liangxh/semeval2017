@@ -81,7 +81,7 @@ class Trainer(BaseTrainer):
         rmsprop = RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
         sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
         merged_model.compile(loss='binary_crossentropy',
-                             optimizer='adam',
+                             optimizer=rmsprop,
                              metrics=['accuracy'])
 
         return merged_model
