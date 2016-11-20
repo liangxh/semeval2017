@@ -16,7 +16,7 @@ from keras.layers import LSTM, SimpleRNN, GRU
 from keras.layers import Embedding
 from keras.layers import Convolution1D, GlobalMaxPooling1D
 from keras.layers.wrappers import Bidirectional
-from keras.optimizers import SGD
+from keras.optimizers import RMSprop, SGD
 
 
 class Trainer(BaseTrainer):
@@ -78,6 +78,8 @@ class Trainer(BaseTrainer):
         merged_model.add(Dense(config['nb_classes']))
         merged_model.add(Activation('softmax'))
 
+        rmsprop = RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
+        sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
         merged_model.compile(loss='binary_crossentropy',
                              optimizer='adam',
                              metrics=['accuracy'])
@@ -87,7 +89,7 @@ class Trainer(BaseTrainer):
 
 def main():
     optparser = OptionParser()
-    optparser.add_option("-t", "--task", dest = "key_subtask", default = "E")
+    optparser.add_option("-t", "--task", dest = "key_subtask", default = "D")
     optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.25d.txt")
     optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
     optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 100)
