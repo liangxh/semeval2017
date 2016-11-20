@@ -28,9 +28,16 @@ class Trainer(BaseTrainer):
             nb_filter = options.nb_filter,
             filter_length = options.filter_length,
             hidden_dims = options.hidden_dims,
-            # dropout_W = options.dropout_W,  # TODO: How to add dropout?
-            # dropout_U = options.dropout_U,
+            dropout_W = options.dropout_W,  # TODO: How to add dropout?
+            dropout_U = options.dropout_U,
+            optimizer = options.optimizer,
         )
+
+    def get_optimizer(self, key_optimizer):
+        if key_optimizer == 'rmsprop':
+            return RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
+        else: # 'sgd'
+            return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
     def build_model(self, config, weights):
         # TODO(zxw) build model according to the paper
@@ -42,7 +49,7 @@ class Trainer(BaseTrainer):
                                 input_length = config['input_length'],
                                 weights = [weights['Wemb']] if 'Wemb' in weights else None))
                                 #dropout = 0.2))
-        gru_model.add(GRU(100, dropout_W=0.25, dropout_U=0.25))
+        gru_model.add(GRU(100, dropout_W=config['dropout_W'], dropout_U=config['dropout_U']))
         # gru_model.add(Dense(config['hidden_dims']))
         # gru_model.add(Activation('sigmoid'))
 
@@ -78,10 +85,8 @@ class Trainer(BaseTrainer):
         merged_model.add(Dense(config['nb_classes']))
         merged_model.add(Activation('softmax'))
 
-        rmsprop = RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
-        sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
         merged_model.compile(loss='binary_crossentropy',
-                             optimizer=rmsprop,
+                             optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
 
         return merged_model
@@ -94,8 +99,9 @@ def main():
     optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
     optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 100)
     optparser.add_option("-l", "--filter_length", dest = "filter_length", type = "int", default = 3)
-    # optparser.add_option("-w", "--dropout_W", dest = "dropout_W", type = "float", default = 0.25)
-    # optparser.add_option("-u", "--dropout_U", dest = "dropout_U", type = "float", default = 0.25)
+    optparser.add_option("-w", "--dropout_W", dest = "dropout_W", type = "float", default = 0.25)
+    optparser.add_option("-u", "--dropout_U", dest = "dropout_U", type = "float", default = 0.25)
+    optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
     opts, args = optparser.parse_args()
 
     trainer = Trainer(opts)
