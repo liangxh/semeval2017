@@ -6,7 +6,7 @@
 """
 
 import numpy as np
-#np.random.seed(1337)  # for reproducibility
+np.random.seed(1337)  # for reproducibility
 
 from keras.utils import np_utils
 from keras.preprocessing import sequence
@@ -90,7 +90,7 @@ class BaseTrainer:
         train = data_manager.read_texts_labels(self.key_subtask, 'train')
         valid = data_manager.read_texts_labels(self.key_subtask, 'dev')
 
-        nb_classes = len(set(map(lambda k:k[1], train)))
+        nb_classes = len(set(map(lambda k:k[1], train)))  # use set() to filter repetitive classes
 
         # set weights for building model
         weights = dict(
@@ -99,7 +99,7 @@ class BaseTrainer:
 
         # set parameters for building model according to dataset and weights
         self.config.update(dict(
-            nb_classes = nb_classes,  # use set() to filter repetitive classes
+            nb_classes = nb_classes,
             max_features = self.text_indexer.size(),
             input_length = self.input_length,
             embedding_dims = weights['Wemb'].shape[1],
@@ -117,7 +117,7 @@ class BaseTrainer:
                         verbose = 0,
                         save_best_only = True,
                         save_weights_only = True,
-                        mode = 'max'
+                        mode = 'auto'
                     )
 
         self.model.fit(
