@@ -9,10 +9,6 @@ import os
 import numpy as np
 import data_manager
 
-#SEED = 111
-#np.random.seed(SEED)
-
-
 def get(vocabs, fname_Wemb):
     """get the weight matrix for word-embedding
 
