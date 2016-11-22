@@ -113,7 +113,7 @@ def main():
     print trainer.simple_evaluate(test)
     print "Evaluation score: %.3f" % trainer.evaluate(test)
 
-    # trainer.load_model_weight()
+    trainer.load_model_weight()
     print trainer.simple_evaluate(test)
     print "Evaluation score: %.3f" % trainer.evaluate(test)
 
