@@ -53,12 +53,14 @@ class Trainer(BaseTrainer):
         # gru_model.add(Dense(config['hidden_dims']))
         # gru_model.add(Activation('sigmoid'))
 
+        '''
         blstm_model = Sequential()
         blstm_model.add(Embedding(config['max_features'],
                                   config['embedding_dims'],
                                   input_length = config['input_length'],
                                   weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        blstm_model.add(Bidirectional(LSTM(100, dropout_W=0.25, dropout_U=0.25)))
+        blstm_model.add(Bidirectional(LSTM(100, dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
+        '''
 
         cnn_model = Sequential()
         cnn_model.add(Embedding(config['max_features'],
@@ -83,8 +85,7 @@ class Trainer(BaseTrainer):
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
-        merged_model.add(Dense(config['nb_classes']))
-        merged_model.add(Activation('softmax'))
+        merged_model.add(Dense(config['nb_classes'], activation='softmax'))
 
         merged_model.compile(loss='binary_crossentropy',
                              optimizer=self.get_optimizer(config['optimizer']),
@@ -96,7 +97,7 @@ class Trainer(BaseTrainer):
 def main():
     optparser = OptionParser()
     optparser.add_option("-t", "--task", dest="key_subtask", default="D")
-    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.42B.300d.txt.trim")
+    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-d", "--hidden_dims", dest="hidden_dims", type="int", default=250)
     optparser.add_option("-f", "--nb_filter", dest="nb_filter", type="int", default=100)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
@@ -110,12 +111,12 @@ def main():
     # trainer.load_model_weight()
 
     test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
-    print trainer.simple_evaluate(test)
-    print "Evaluation score: %.3f" % trainer.evaluate(test)
+    loss, acc = trainer.simple_evaluate(test)
+    print "Loss: %.3f Acc: %.3f Evaluation score: %.3f" % (loss, acc, trainer.evaluate(test))
 
     trainer.load_model_weight()
-    print trainer.simple_evaluate(test)
-    print "Evaluation score: %.3f" % trainer.evaluate(test)
+    loss, acc = trainer.simple_evaluate(test)
+    print "Loss: %.3f Acc: %.3f Evaluation score: %.3f" % (loss, acc, trainer.evaluate(test))
 
 
 if __name__ == '__main__':
