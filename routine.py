@@ -35,10 +35,13 @@ def countword():
 
     key_subtask = sys.argv[2].upper()
 
+    wc = {}
     for mode in ["train", "dev", "devtest"]:
         texts = data_manager.read_texts(key_subtask, mode)
-        output_fname = data_manager.fname_wordcount(key_subtask)
-        wordcount.export(wordcount.count(texts).items(), output_fname)
+        wc = wordcount.count(texts, wc)
+
+    output_fname = data_manager.fname_wordcount(key_subtask)
+    wordcount.export(wc.items(), output_fname)
 
 funcs = {}
 for name in dir():
