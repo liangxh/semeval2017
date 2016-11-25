@@ -68,10 +68,10 @@ class Trainer(BaseTrainer):
                                 config['embedding_dims'],
                                 input_length = config['input_length'],
                                 weights = [weights['Wemb']] if 'Wemb' in weights else None),
-                                #dropout = 0.2
+                                # dropout = 0.2
                                 )
 
-        #cnn_model.add(ZeroPadding1D(int(config['filter_length'] / 2)))
+        # cnn_model.add(ZeroPadding1D(int(config['filter_length'] / 2)))
         cnn_model.add(Convolution1D(nb_filter=config['nb_filter'],
                                     filter_length=config['filter_length'],
                                     border_mode='valid',

@@ -7,8 +7,8 @@
 
 
 from optparse import OptionParser
-from src.trainer import BaseTrainer
-from src.common import data_manager
+from trainer import BaseTrainer
+from common import data_manager
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Embedding, Merge
@@ -80,7 +80,7 @@ class Trainer(BaseTrainer):
 def main():
     optparser = OptionParser()
     optparser.add_option("-t", "--task", dest = "key_subtask", default = "D")
-    optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.50d.txt.trim")
+    optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
     optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 100)
     optparser.add_option("-l", "--filter_length", dest = "filter_length", type = "int", default = 3)

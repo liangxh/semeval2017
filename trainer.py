@@ -15,11 +15,11 @@ if hasattr(global_config, 'NP_RANDOM_SEED'):
 
 from keras.utils import np_utils
 from keras.preprocessing import sequence
-from keras.callbacks import ModelCheckpoint
-
+from keras.callbacks import ModelCheckpoint, Callback
 
 from util import tokenizer
 from common import data_manager, input_adapter, wordembed
+
 
 class BaseTrainer:
     def __init__(self, options):
@@ -113,23 +113,28 @@ class BaseTrainer:
                         mode='auto'
                     )
 
+        bestscore = SaveBestScore(self.key_subtask)
+
         self.model.fit(
             train[0], train[1],
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
             validation_data=valid,
-            callbacks=[checkpoint, ]
+            callbacks=[bestscore, ]
         )
+
+    def pred_classes(self, texts):
+        X = self.prepare_X(texts)
+        return self.model.predict_classes(X, batch_size=self.batch_size)
 
     def evaluate(self, test):
         """
         Args
             test: a tuple of two lists: list of texts and list of labels
         """
+        texts = map(lambda k:k[0], test)
 
-        test = self.prepare_XY(test)
-
-        pred_classes = self.model.predict_classes(test[0], batch_size=self.batch_size)
+        pred_classes = self.pred_classes(texts)
 
         if self.key_subtask == 'A':
             data_manager.write_id_label(self.key_subtask, pred_classes)
@@ -155,4 +160,25 @@ class BaseTrainer:
     def simple_evaluate(self, test):
         test = self.prepare_XY(test)
         return self.model.evaluate(*test, batch_size=self.batch_size)
+
+
+class SaveBestScore(Callback):
+    def __init__(self, key_subtask):
+        self.key_subtask = key_subtask
+        self.max_score = 0
+        self.max_valacc = 0
+        self.val = data_manager.read_texts_labels(key_subtask, 'dev')
+
+        super(Callback, self).__init__()
+
+    def on_epoch_end(self, epoch, logs={}):
+        if logs.get('val_acc') > self.max_valacc:
+            self.max_valacc = logs.get('val_acc')
+
+        #if BaseTrainer.evaluate(self.val) > self.max_score:
+         #   self.max_score = BaseTrainer.evaluate(self.val)
+
+    def on_train_end(self, logs={}):
+        print 'maximum val_acc: ', self.max_valacc
+        print 'maximum score:', self.max_score
 

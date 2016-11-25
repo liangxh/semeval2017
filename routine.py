@@ -11,6 +11,7 @@ import re
 import types
 from common import data_manager
 
+
 def clean():
     """$ ./routine.py clean"""
 
@@ -20,7 +21,7 @@ def clean():
         for fname in files:
             input_fname = os.path.join(root, fname)
             output_fname = os.path.join(root.replace('raw', 'clean'), re.sub('\.\w+$', '.txt', fname))
-            print "cleaning file %s"%(fname)
+            print "cleaning file %s" % fname
             data_cleaner.clean(input_fname, output_fname)
 
 
