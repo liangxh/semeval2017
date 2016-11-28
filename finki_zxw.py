@@ -36,9 +36,6 @@ class Trainer(BaseTrainer):
         )
 
     def build_model(self, config, weights):
-        # TODO(zxw) build model according to the paper
-        # TODO(zxw) make the options controllable
-
         gru_model = Sequential()
         gru_model.add(Embedding(config['max_features'],
                                 config['embedding_dims'],

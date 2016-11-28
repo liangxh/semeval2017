@@ -18,7 +18,7 @@ from keras.preprocessing import sequence
 from keras.callbacks import ModelCheckpoint, Callback
 
 from util import tokenizer
-from common import data_manager, input_adapter, wordembed
+from common import data_manager, input_adapter, wordembed, pred_builder
 
 
 class BaseTrainer:
@@ -113,40 +113,40 @@ class BaseTrainer:
                         mode='auto'
                     )
 
-        bestscore = SaveBestScore(self.key_subtask)
+        #bestscore = SaveBestScore(self.key_subtask)
 
         self.model.fit(
             train[0], train[1],
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
             validation_data=valid,
-            callbacks=[bestscore, ]
+            #callbacks=[bestscore, ]
         )
 
     def pred_classes(self, texts):
         X = self.prepare_X(texts)
-        return self.model.predict_classes(X, batch_size=self.batch_size)
+        Y = self.model.predict_classes(X, batch_size=self.batch_size)
+        labels = map(self.label_indexer.label, Y)
 
-    def evaluate(self, test):
-        """
-        Args
-            test: a tuple of two lists: list of texts and list of labels
-        """
-        texts = map(lambda k:k[0], test)
+        return labels
+    
+    def evaluate(self, mode='devtest'):
+        # TODO(zxw) read this
 
-        pred_classes = self.pred_classes(texts)
+        texts = data_manager.read_texts(self.key_subtask, mode)
+        labels = self.pred_classes(texts)
+        pred_builder.build(self.key_subtask, mode, labels)
 
-        if self.key_subtask == 'A':
-            data_manager.write_id_label(self.key_subtask, pred_classes)
+        o = commands.getoutput(
+             "perl eval/score-semeval2016-task4-subtask%s.pl " \
+             "../data/result/%s_%s_gold.txt " \
+             "../data/result/%s_%s_pred.txt"%(
+                self.key_subtask, 
+                self.key_subtask, mode, 
+                self.key_subtask, mode,
+            )
+        )
 
-        elif self.key_subtask == 'B' or self.key_subtask == 'C':
-            data_manager.write_id_topic_label(self.key_subtask, pred_classes)
-        elif self.key_subtask == 'D':
-            data_manager.write_topic_label(self.key_subtask, pred_classes)
-        else:
-            data_manager.write_topic_5labels(self.key_subtask, pred_classes)
-
-        o = commands.getoutput("./eval.sh %s"%(self.key_subtask))
         try:
             o = o.strip()
             lines = o.split("\n")
@@ -156,6 +156,7 @@ class BaseTrainer:
             print "trainer.evaluate: [warning] invalid output file for semeval measures tool"
             print [o, ]
             return None
+
 
     def simple_evaluate(self, test):
         test = self.prepare_XY(test)

@@ -44,6 +44,16 @@ def countword():
     output_fname = data_manager.fname_wordcount(key_subtask)
     wordcount.export(wc.items(), output_fname)
 
+
+def gold():
+    """$ ./routine.py gold"""
+    
+    from common import gold_builder
+    for key_subtask in list('ABCDE'):
+        for mode in ['train', 'dev', 'devtest']:
+            gold_builder.build(key_subtask, mode)
+
+
 funcs = {}
 for name in dir():
     if not name.startswith('_'): # not builtin-functions

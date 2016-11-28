@@ -110,8 +110,13 @@ def main():
 
     trainer = Trainer(opts)
     trainer.train()
+
+    score = trainer.evaluate('devtest')
+    print "Evaluation score: %.3f" % score
+
     # trainer.load_model_weight()
 
+    '''
     test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
     loss, acc = trainer.simple_evaluate(test)
     print "Loss: %.3f Acc: %.3f Evaluation score: %.3f" % (loss, acc, trainer.evaluate(test))
@@ -119,7 +124,7 @@ def main():
     trainer.load_model_weight()
     loss, acc = trainer.simple_evaluate(test)
     print "Loss: %.3f Acc: %.3f Evaluation score: %.3f" % (loss, acc, trainer.evaluate(test))
-
+    '''
 
 if __name__ == '__main__':
     main() 
