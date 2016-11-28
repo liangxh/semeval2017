@@ -36,9 +36,6 @@ class Trainer(BaseTrainer):
         )
 
     def build_model(self, config, weights):
-        # TODO(zxw) build model according to the paper
-        # TODO(zxw) make the options controllable
-
         gru_model = Sequential()
         gru_model.add(Embedding(config['max_features'],
                                 config['embedding_dims'],
@@ -93,7 +90,7 @@ class Trainer(BaseTrainer):
 def main():
     optparser = OptionParser()
     optparser.add_option("-t", "--task", dest = "key_subtask", default = "D")
-    optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.50d.txt.trim")
+    optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.840B.300d.txt.trim")
     optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
     optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 100)
     optparser.add_option("-l", "--filter_length", dest = "filter_length", type = "int", default = 3)

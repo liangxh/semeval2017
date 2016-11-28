@@ -15,11 +15,11 @@ if hasattr(global_config, 'NP_RANDOM_SEED'):
 
 from keras.utils import np_utils
 from keras.preprocessing import sequence
-from keras.callbacks import ModelCheckpoint
-
+from keras.callbacks import ModelCheckpoint, Callback
 
 from util import tokenizer
-from common import data_manager, input_adapter, wordembed
+from common import data_manager, input_adapter, wordembed, pred_builder
+
 
 class BaseTrainer:
     def __init__(self, options):
@@ -113,35 +113,40 @@ class BaseTrainer:
                         mode='auto'
                     )
 
+        #bestscore = SaveBestScore(self.key_subtask)
+
         self.model.fit(
             train[0], train[1],
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
             validation_data=valid,
-            callbacks=[checkpoint, ]
+            #callbacks=[bestscore, ]
         )
 
-    def evaluate(self, test):
-        """
-        Args
-            test: a tuple of two lists: list of texts and list of labels
-        """
+    def pred_classes(self, texts):
+        X = self.prepare_X(texts)
+        Y = self.model.predict_classes(X, batch_size=self.batch_size)
+        labels = map(self.label_indexer.label, Y)
 
-        test = self.prepare_XY(test)
+        return labels
+    
+    def evaluate(self, mode='devtest'):
+        # TODO(zxw) read this
 
-        pred_classes = self.model.predict_classes(test[0], batch_size=self.batch_size)
+        texts = data_manager.read_texts(self.key_subtask, mode)
+        labels = self.pred_classes(texts)
+        pred_builder.build(self.key_subtask, mode, labels)
 
-        if self.key_subtask == 'A':
-            data_manager.write_id_label(self.key_subtask, pred_classes)
+        o = commands.getoutput(
+             "perl eval/score-semeval2016-task4-subtask%s.pl " \
+             "../data/result/%s_%s_gold.txt " \
+             "../data/result/%s_%s_pred.txt"%(
+                self.key_subtask, 
+                self.key_subtask, mode, 
+                self.key_subtask, mode,
+            )
+        )
 
-        elif self.key_subtask == 'B' or self.key_subtask == 'C':
-            data_manager.write_id_topic_label(self.key_subtask, pred_classes)
-        elif self.key_subtask == 'D':
-            data_manager.write_topic_label(self.key_subtask, pred_classes)
-        else:
-            data_manager.write_topic_5labels(self.key_subtask, pred_classes)
-
-        o = commands.getoutput("./eval.sh %s"%(self.key_subtask))
         try:
             o = o.strip()
             lines = o.split("\n")
@@ -152,7 +157,29 @@ class BaseTrainer:
             print [o, ]
             return None
 
+
     def simple_evaluate(self, test):
         test = self.prepare_XY(test)
         return self.model.evaluate(*test, batch_size=self.batch_size)
+
+
+class SaveBestScore(Callback):
+    def __init__(self, key_subtask):
+        self.key_subtask = key_subtask
+        self.max_score = 0
+        self.max_valacc = 0
+        self.val = data_manager.read_texts_labels(key_subtask, 'dev')
+
+        super(Callback, self).__init__()
+
+    def on_epoch_end(self, epoch, logs={}):
+        if logs.get('val_acc') > self.max_valacc:
+            self.max_valacc = logs.get('val_acc')
+
+        #if BaseTrainer.evaluate(self.val) > self.max_score:
+         #   self.max_score = BaseTrainer.evaluate(self.val)
+
+    def on_train_end(self, logs={}):
+        print 'maximum val_acc: ', self.max_valacc
+        print 'maximum score:', self.max_score
 

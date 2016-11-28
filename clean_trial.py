@@ -44,4 +44,4 @@ def split_subtask(input_fname, output_fname):  # labels for BCDE --> BD, CE
 
 
 if __name__ == '__main__':
-    split_subtask('../data/raw/trialCDE.txt', '../data/clean/trialCE.txt')
+    split_subtask('', '')
