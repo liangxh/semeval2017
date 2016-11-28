@@ -7,8 +7,8 @@
 
 
 from optparse import OptionParser
-from src.trainer import BaseTrainer
-from src.common import data_manager
+from trainer import BaseTrainer
+from common import data_manager
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Embedding, Merge
