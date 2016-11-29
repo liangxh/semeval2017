@@ -12,7 +12,7 @@ from util.indexer import Indexer
 
 
 def build(key_subtask, mode):
-    return eval('build_%s'%(key_subtask))(mode)
+    return eval('build_%s' % key_subtask)(mode)
 
 
 def build_A(mode):
@@ -22,7 +22,7 @@ def build_A(mode):
 
     fobj = open(ofname, 'w')
     for row in rows:
-        fobj.write('%s\t%s\n'%(row[0], row[1]))
+        fobj.write('%s\t%s\n' % (row[0], row[1]))
     fobj.close()
 
 
@@ -33,7 +33,7 @@ def build_B(mode):
 
     fobj = open(ofname, 'w')
     for row in rows:
-        fobj.write('%s\t%s\t%s\n'%(row[0], row[1], row[2]))
+        fobj.write('%s\t%s\t%s\n' % (row[0], row[1], row[2]))
     fobj.close()
 
 
@@ -44,7 +44,7 @@ def build_C(mode):
 
     fobj = open(ofname, 'w')
     for row in rows:
-        fobj.write('%s\t%s\t%s\n'%(row[0], row[1], row[2]))
+        fobj.write('%s\t%s\t%s\n' % (row[0], row[1], row[2]))
     fobj.close()
 
 
@@ -60,7 +60,7 @@ def build_D(mode):
         topic = row[1]
         label = row[2]
 
-        if not topic in topic_label:
+        if topic not in topic_label:
             topic_label[topic] = np.zeros(indexer.size())
         
         topic_label[topic][indexer.idx(label)] += 1
@@ -69,9 +69,9 @@ def build_D(mode):
     for topic, labels in topic_label.items():
         n_sample = np.sum(labels)
         dist = labels / n_sample
-        fobj.write('%s\t%s\t%d\n'%(
+        fobj.write('%s\t%s\t%d\n' % (
                     topic,
-                    '\t'.join(map(lambda k: '%.10f'%(k), dist)),
+                    '\t'.join(map(lambda k: '%.12f' % k, dist)),
                     int(n_sample)
                     ))
 
@@ -90,7 +90,7 @@ def build_E(mode):
         topic = row[1]
         label = row[2]
 
-        if not topic in topic_label:
+        if topic not in topic_label:
             topic_label[topic] = np.zeros(indexer.size())
         
         topic_label[topic][indexer.idx(label)] += 1
@@ -101,6 +101,7 @@ def build_E(mode):
         dist = labels / n_sample
         fobj.write('%s\t%s\n'%(
                     topic,
-                    '\t'.join(map(lambda k: '%.10f'%(k), dist))                    ))
+                    '\t'.join(map(lambda k: '%.12f' % k, dist))
+                    ))
 
     fobj.close()

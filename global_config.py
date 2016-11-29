@@ -6,6 +6,6 @@
 
 NP_RANDOM_SEED = 1337
 
-nb_epoch = 1
+nb_epoch = 15
 batch_size = 32
 input_length = 45

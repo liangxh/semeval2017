@@ -90,7 +90,7 @@ class Trainer(BaseTrainer):
 def main():
     optparser = OptionParser()
     optparser.add_option("-t", "--task", dest = "key_subtask", default = "D")
-    optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.840B.300d.txt.trim")
+    optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
     optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 100)
     optparser.add_option("-l", "--filter_length", dest = "filter_length", type = "int", default = 3)
@@ -101,8 +101,11 @@ def main():
     trainer = Trainer(opts)
     trainer.train()
 
-    test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
-    trainer.evaluate(test)
+    # test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
+    # trainer.evaluate(test)
+
+    score = trainer.evaluate('devtest')
+    print "Evaluation score: %.3f" % score
 
 
 if __name__ == '__main__':

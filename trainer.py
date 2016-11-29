@@ -18,7 +18,7 @@ from keras.preprocessing import sequence
 from keras.callbacks import ModelCheckpoint, Callback
 
 from util import tokenizer
-from common import data_manager, input_adapter, wordembed, pred_builder
+from common import data_manager, input_adapter, wordembed, pred_builder, gold_builder
 
 
 class BaseTrainer:
@@ -87,7 +87,7 @@ class BaseTrainer:
 
         # set weights for building model
         weights = dict(
-            Wemb = wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
+            Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
         )
 
         # set parameters for building model according to dataset and weights
@@ -131,16 +131,15 @@ class BaseTrainer:
         return labels
     
     def evaluate(self, mode='devtest'):
-        # TODO(zxw) read this
-
         texts = data_manager.read_texts(self.key_subtask, mode)
         labels = self.pred_classes(texts)
         pred_builder.build(self.key_subtask, mode, labels)
+        gold_builder.build(self.key_subtask, mode)
 
         o = commands.getoutput(
              "perl eval/score-semeval2016-task4-subtask%s.pl " \
              "../data/result/%s_%s_gold.txt " \
-             "../data/result/%s_%s_pred.txt"%(
+             "../data/result/%s_%s_pred.txt" % (
                 self.key_subtask, 
                 self.key_subtask, mode, 
                 self.key_subtask, mode,
@@ -156,7 +155,6 @@ class BaseTrainer:
             print "trainer.evaluate: [warning] invalid output file for semeval measures tool"
             print [o, ]
             return None
-
 
     def simple_evaluate(self, test):
         test = self.prepare_XY(test)
