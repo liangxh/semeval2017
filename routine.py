@@ -39,10 +39,10 @@ def countword():
     wc = {}
     for mode in ["train", "dev", "devtest"]:
         texts = data_manager.read_texts(key_subtask, mode)
-        wc = wordcount.count(texts)
+        wc = wordcount.count(texts, wc)
 
-        output_fname = data_manager.fname_wordcount(key_subtask)
-        wordcount.export(wc.items(), output_fname)
+    output_fname = data_manager.fname_wordcount(key_subtask)
+    wordcount.export(wc.items(), output_fname)
 
 
 def gold():

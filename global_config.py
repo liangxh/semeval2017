@@ -4,7 +4,7 @@
 @created: 2016.11.22
 """
 
-NP_RANDOM_SEED = 1337
+NP_RANDOM_SEED = 256
 
 nb_epoch = 15
 batch_size = 32

@@ -114,7 +114,9 @@ def main():
     score = trainer.evaluate('devtest')
     print "Evaluation score: %.3f" % score
 
-    # trainer.load_model_weight()
+    trainer.load_model_weight()
+    score = trainer.evaluate('devtest')
+    print "Evaluation score: %.3f" % score
 
     '''
     test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')

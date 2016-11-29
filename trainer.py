@@ -74,6 +74,10 @@ class BaseTrainer:
         fname = data_manager.fname_model_config(self.key_subtask, self.model_name)
         open(fname, 'w').write(self.model.to_json())
 
+    def save_model_weight(self):
+        fname = data_manager.fname_model_weight(self.key_subtask, self.model_name)
+        self.model.save_weights(fname)
+
     def load_model_weight(self):
         fname = data_manager.fname_model_weight(self.key_subtask, self.model_name)
         self.model.load_weights(fname)
@@ -102,25 +106,27 @@ class BaseTrainer:
         valid = self.prepare_XY(valid)
 
         self.model = self.build_model(self.config, weights)
-        self.save_model_config()        
+        self.save_model_config()
 
+        '''
         checkpoint = ModelCheckpoint(
-                        data_manager.fname_model_weight(self.key_subtask, self.model_name),
-                        monitor='val_acc',
-                        verbose=0,
-                        save_best_only=True,
-                        save_weights_only=True,
-                        mode='auto'
-                    )
+                                 data_manager.fname_model_weight(self.key_subtask, self.model_name),
+                                 monitor = 'val_acc',
+                                 verbose = 0,
+                                 save_best_only = True,
+                                 save_weights_only = True,
+                                 mode = 'auto'
+                                )
+        '''
 
-        #bestscore = SaveBestScore(self.key_subtask)
+        bestscore = SaveBestScore(self)
 
         self.model.fit(
             train[0], train[1],
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
             validation_data=valid,
-            #callbacks=[bestscore, ]
+            callbacks=[bestscore, ]
         )
 
     def pred_classes(self, texts):
@@ -134,7 +140,6 @@ class BaseTrainer:
         texts = data_manager.read_texts(self.key_subtask, mode)
         labels = self.pred_classes(texts)
         pred_builder.build(self.key_subtask, mode, labels)
-        gold_builder.build(self.key_subtask, mode)
 
         o = commands.getoutput(
              "perl eval/score-semeval2016-task4-subtask%s.pl " \
@@ -162,22 +167,36 @@ class BaseTrainer:
 
 
 class SaveBestScore(Callback):
-    def __init__(self, key_subtask):
-        self.key_subtask = key_subtask
-        self.max_score = 0
+    def __init__(self, trainer):
+        self.trainer = trainer
+        self.key_subtask = trainer.key_subtask
+        self.score = 0
+        self.best_score = None
         self.max_valacc = 0
-        self.val = data_manager.read_texts_labels(key_subtask, 'dev')
 
         super(Callback, self).__init__()
 
     def on_epoch_end(self, epoch, logs={}):
+        self.score = self.trainer.evaluate('dev')
+        print ' - val_score:', self.score
+
         if logs.get('val_acc') > self.max_valacc:
             self.max_valacc = logs.get('val_acc')
 
-        #if BaseTrainer.evaluate(self.val) > self.max_score:
-         #   self.max_score = BaseTrainer.evaluate(self.val)
+        if self.best_score is None:
+            self.best_score = self.score
+
+        if self.key_subtask == 'A' or self.key_subtask == 'B':
+            if self.score > self.best_score:
+                self.best_score = self.score
+                self.trainer.save_model_weight()
+
+        if self.score < self.best_score:
+            self.best_score = self.score
+            self.trainer.save_model_weight()
 
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
-        print 'maximum score:', self.max_score
+        print 'best score:', self.best_score
+
 

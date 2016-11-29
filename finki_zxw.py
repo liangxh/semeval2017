@@ -7,7 +7,7 @@
 
 
 from optparse import OptionParser
-from src.trainer import BaseTrainer
+from trainer import BaseTrainer
 from src.common import data_manager
 
 from keras.models import Sequential
