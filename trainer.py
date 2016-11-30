@@ -180,6 +180,8 @@ class SaveBestScore(Callback):
         self.score = self.trainer.evaluate('dev')
         print ' - val_score:', self.score
 
+        # print ' - devtest_score:', self.trainer.evaluate('devtest')
+
         if logs.get('val_acc') > self.max_valacc:
             self.max_valacc = logs.get('val_acc')
 
@@ -191,9 +193,10 @@ class SaveBestScore(Callback):
                 self.best_score = self.score
                 self.trainer.save_model_weight()
 
-        if self.score < self.best_score:
-            self.best_score = self.score
-            self.trainer.save_model_weight()
+        else:
+            if self.score < self.best_score:
+                self.best_score = self.score
+                self.trainer.save_model_weight()
 
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
