@@ -34,6 +34,7 @@ class Trainer(BaseTrainer):
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
             optimizer = options.optimizer,
+            rnn_output_dims = options.rnn_output_dims
         )
 
     def get_optimizer(self, key_optimizer):
@@ -50,7 +51,7 @@ class Trainer(BaseTrainer):
                                 weights=[weights['Wemb']] if 'Wemb' in weights else None),
                                 # dropout=0.2,
                                 )
-        gru_model.add(GRU(100, dropout_W=config['dropout_W'], dropout_U=config['dropout_U']))
+        gru_model.add(GRU(config['rnn_output_dims'], dropout_W=config['dropout_W'], dropout_U=config['dropout_U']))
         # gru_model.add(Dense(config['hidden_dims']))
         # gru_model.add(Activation('sigmoid'))
 
@@ -108,6 +109,7 @@ def main():
     optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-d", "--hidden_dims", dest="hidden_dims", type="int", default=250)
     optparser.add_option("-f", "--nb_filter", dest="nb_filter", type="int", default=100)
+    optparser.add_option("-r", "--rnn_output_dims", dest="rnn_output_dims", type="int", default=100)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
