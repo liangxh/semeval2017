@@ -7,6 +7,8 @@
 
 import global_config
 
+import os
+import cPickle
 import commands
 import numpy as np
 
@@ -60,7 +62,9 @@ class BaseTrainer:
 
     def prepare_Y(self, labels):
         y = self.label_indexer.idx(labels)
-        y = np_utils.to_categorical(y)
+
+        if self.config['nb_classes'] > 2:
+            y = np_utils.to_categorical(y)
 
         return y
 
@@ -129,16 +133,18 @@ class BaseTrainer:
             callbacks=[bestscore, ]
         )
 
-    def pred_classes(self, texts):
+        bestscore.export_history()
+
+    def pred_classes(self, texts, verbose=0):
         X = self.prepare_X(texts)
-        Y = self.model.predict_classes(X, batch_size=self.batch_size)
+        Y = self.model.predict_classes(X, batch_size=self.batch_size, verbose=verbose)
         labels = map(self.label_indexer.label, Y)
 
         return labels
     
-    def evaluate(self, mode='devtest'):
+    def evaluate(self, mode='devtest', verbose=0):
         texts = data_manager.read_texts(self.key_subtask, mode)
-        labels = self.pred_classes(texts)
+        labels = self.pred_classes(texts, verbose)
         pred_builder.build(self.key_subtask, mode, labels)
 
         o = commands.getoutput(
@@ -173,33 +179,34 @@ class SaveBestScore(Callback):
         self.score = 0
         self.best_score = None
         self.max_valacc = 0
+        self.prior_score = (lambda a, b: a > b) \
+            if self.key_subtask in ['A', 'B'] else (lambda a, b: a < b)
+        self.dev_scores = []
+        self.devtest_scores = []
 
         super(Callback, self).__init__()
 
     def on_epoch_end(self, epoch, logs={}):
         self.score = self.trainer.evaluate('dev')
-        print ' - val_score:', self.score
+        # print ' - val_score: %f' % self.score
 
-        # print ' - devtest_score:', self.trainer.evaluate('devtest')
+        devtest_score = self.trainer.evaluate('devtest')
+        self.dev_scores.append(self.score)
+        self.devtest_scores.append(devtest_score)
+        # print ' - devtest_score: %f'%(devtest_score)
 
         if logs.get('val_acc') > self.max_valacc:
             self.max_valacc = logs.get('val_acc')
 
-        if self.best_score is None:
+        if self.best_score is None or self.prior_score(self.score, self.best_score):
             self.best_score = self.score
-
-        if self.key_subtask == 'A' or self.key_subtask == 'B':
-            if self.score > self.best_score:
-                self.best_score = self.score
-                self.trainer.save_model_weight()
-
-        else:
-            if self.score < self.best_score:
-                self.best_score = self.score
-                self.trainer.save_model_weight()
+            self.trainer.save_model_weight()
 
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
         print 'best score:', self.best_score
 
+    def export_history(self):
+        fname = os.path.join(data_manager.DIR_RESULT, '%s_history.json' % self.trainer.model_name)
+        cPickle.dump((self.dev_scores, self.devtest_scores), open(fname, 'w'))
 

@@ -87,9 +87,15 @@ class Trainer(BaseTrainer):
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
-        merged_model.add(Dense(config['nb_classes'], activation='softmax'))
 
-        merged_model.compile(loss='binary_crossentropy',
+        if config['nb_classes'] > 2:
+            merged_model.add(Dense(config['nb_classes'], activation='softmax'))
+            loss_type = 'categorical_crossentropy'
+        else:
+            merged_model.add(Dense(1, activation='sigmoid'))
+            loss_type = 'binary_crossentropy'
+
+        merged_model.compile(loss=loss_type,
                              optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
 
@@ -111,11 +117,11 @@ def main():
     trainer = Trainer(opts)
     trainer.train()
 
-    score = trainer.evaluate('devtest')
+    score = trainer.evaluate('devtest', verbose=1)
     print "Evaluation score: %.3f" % score
 
     trainer.load_model_weight()
-    score = trainer.evaluate('devtest')
+    score = trainer.evaluate('devtest', verbose=1)
     print "Evaluation score: %.3f" % score
 
     '''
