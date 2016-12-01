@@ -183,10 +183,14 @@ class SaveBestScore(Callback):
             if self.key_subtask in ['A', 'B'] else (lambda a, b: a < b)
         self.dev_scores = []
         self.devtest_scores = []
+        self.num_epoch = 0
+        self.best_epoch = 0
 
         super(Callback, self).__init__()
 
     def on_epoch_end(self, epoch, logs={}):
+        self.num_epoch += 1
+
         self.score = self.trainer.evaluate('dev')
         # print ' - val_score: %f' % self.score
 
@@ -200,11 +204,12 @@ class SaveBestScore(Callback):
 
         if self.best_score is None or self.prior_score(self.score, self.best_score):
             self.best_score = self.score
+            self.best_epoch = self.num_epoch
             self.trainer.save_model_weight()
 
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
-        print 'best score:', self.best_score
+        print 'best score:', self.best_score, ' corresponding epoch number:', self.best_epoch
 
     def export_history(self):
         fname = os.path.join(data_manager.DIR_RESULT, '%s_history.json' % self.trainer.model_name)
