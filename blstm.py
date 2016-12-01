@@ -33,7 +33,15 @@ class Trainer(BaseTrainer):
             hidden_dims = options.hidden_dims,
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
+            optimizer = options.optimizer,
+            rnn_output_dims = options.rnn_output_dims
         )
+
+    def get_optimizer(self, key_optimizer):
+        if key_optimizer == 'rmsprop':
+            return RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
+        else:  # 'sgd'
+            return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
     def build_model(self, config, weights):
         blstm_model = Sequential()
@@ -41,7 +49,8 @@ class Trainer(BaseTrainer):
                                   config['embedding_dims'],
                                   input_length = config['input_length'],
                                   weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        blstm_model.add(Bidirectional(LSTM(100, dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
+        blstm_model.add(Bidirectional(LSTM(config['rnn_output_dims'],
+                                           dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
 
         cnn_model = Sequential()
         cnn_model.add(Embedding(config['max_features'],
@@ -65,13 +74,16 @@ class Trainer(BaseTrainer):
         merged_model.add(Merge([blstm_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
-        merged_model.add(Dense(config['nb_classes']))
-        merged_model.add(Activation('softmax'))
 
-        rmsprop = RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
-        sgd = SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
-        merged_model.compile(loss='binary_crossentropy',
-                             optimizer=rmsprop,
+        if config['nb_classes'] > 2:
+            merged_model.add(Dense(config['nb_classes'], activation='softmax'))
+            loss_type = 'categorical_crossentropy'
+        else:
+            merged_model.add(Dense(1, activation='sigmoid'))
+            loss_type = 'binary_crossentropy'
+
+        merged_model.compile(loss=loss_type,
+                             optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
 
         return merged_model
@@ -79,13 +91,15 @@ class Trainer(BaseTrainer):
 
 def main():
     optparser = OptionParser()
-    optparser.add_option("-t", "--task", dest = "key_subtask", default = "D")
-    optparser.add_option("-e", "--embedding", dest = "fname_Wemb", default = "glove.twitter.27B.25d.txt.trim")
-    optparser.add_option("-d", "--hidden_dims", dest = "hidden_dims", type = "int", default = 250)
-    optparser.add_option("-f", "--nb_filter", dest = "nb_filter", type = "int", default = 100)
-    optparser.add_option("-l", "--filter_length", dest = "filter_length", type = "int", default = 3)
-    optparser.add_option("-w", "--dropout_W", dest = "dropout_W", type = "float", default = 0.25)
-    optparser.add_option("-u", "--dropout_U", dest = "dropout_U", type = "float", default = 0.25)
+    optparser.add_option("-t", "--task", dest="key_subtask", default="D")
+    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
+    optparser.add_option("-d", "--hidden_dims", dest="hidden_dims", type="int", default=250)
+    optparser.add_option("-f", "--nb_filter", dest="nb_filter", type="int", default=100)
+    optparser.add_option("-r", "--rnn_output_dims", dest="rnn_output_dims", type="int", default=100)
+    optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
+    optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
+    optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
+    optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
     opts, args = optparser.parse_args()
 
     trainer = Trainer(opts)
@@ -93,11 +107,11 @@ def main():
 
     # test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
 
-    score = trainer.evaluate('devtest')
+    score = trainer.evaluate('devtest', verbose=1)
     print "Evaluation score: %.3f" % score
 
     trainer.load_model_weight()
-    score = trainer.evaluate('devtest')
+    score = trainer.evaluate('devtest', verbose=1)
     print "Evaluation score: %.3f" % score
 
 if __name__ == '__main__':
