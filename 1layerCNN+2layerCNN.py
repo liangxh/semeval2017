@@ -46,6 +46,14 @@ class Trainer(BaseTrainer):
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
     def build_model(self, config, weights):
+        bgrnn_model = Sequential()
+        bgrnn_model.add(Embedding(config['max_features'],
+                                  config['embedding_dims'],
+                                  input_length = config['input_length'],
+                                  weights = [weights['Wemb']] if 'Wemb' in weights else None))
+        bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims'],
+                                          dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
+
         cnn_i_model = Sequential()
         cnn_i_model.add(Embedding(config['max_features'],
                                   config['embedding_dims'],
@@ -86,6 +94,7 @@ class Trainer(BaseTrainer):
 
         # merged model
         merged_model = Sequential()
+        # merged_model.add(Merge([bgrnn_model, cnn_i_model, cnn_ii_model], mode='concat', concat_axis=1))
         merged_model.add(Merge([cnn_i_model, cnn_ii_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
