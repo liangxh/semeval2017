@@ -67,7 +67,6 @@ class Trainer(BaseTrainer):
                                     activation = 'relu',
                                     subsample_length = 1))
 
-        # cnn_model.add(GlobalMaxPooling1D())
         cnn_model.add(MaxPooling1D(pool_length=6, stride=2, border_mode='valid'))
 
         cnn_model.add(Convolution1D(nb_filter = config['nb_filter_2'],
