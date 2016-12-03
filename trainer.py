@@ -145,8 +145,12 @@ class BaseTrainer:
 
                 fname = '../data/pred_prob/%s_%s_%s.txt' % (self.key_subtask, name, self.config['model_name'])
                 with open(fname, 'w') as f:
-                    for result, topic in zip(results, topics):
-                        f.write(topic + '\t' + '\t'.join(map(str, result)) + '\n')
+                    if topics is not None:
+                        for result, topic in zip(results, topics):
+                            f.write(topic + '\t' + '\t'.join(map(str, result)) + '\n')
+                    else:
+                        for result in results:
+                            f.write('\t'.join(map(str, result)) + '\n')
 
     def pred_classes(self, texts, verbose=0):
         X = self.prepare_X(texts)

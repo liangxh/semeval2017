@@ -88,9 +88,11 @@ def read_texts_labels(key_subtask, mode):
 
 
 def read_topic(key_subtask, mode):
-    lines = read_data(key_subtask, mode)
+    if key_subtask is not 'A':
+        lines = read_data(key_subtask, mode)
 
-    return map(lambda k: k[1], lines)
+        return map(lambda k: k[1], lines)
+    return None
 
 
 def write_id_label(key_subtask, pred_classes):  # only for subtask A
