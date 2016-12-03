@@ -33,6 +33,7 @@ class BaseTrainer:
         self.set_model_config(options)
         self.init_indexer()
         self.model_name = self.get_model_name()
+        self.merge_num = options.merge_num
 
     def get_model_name(self):
         """
@@ -86,10 +87,11 @@ class BaseTrainer:
         fname = data_manager.fname_model_weight(self.key_subtask, self.model_name)
         self.model.load_weights(fname)
 
-    def train(self):
+    def train(self, pred_prob=0):
         # load raw texts and labels
         train = data_manager.read_texts_labels(self.key_subtask, 'train')
-        valid = data_manager.read_texts_labels(self.key_subtask, 'dev')
+        dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
+        devtest = data_manager.read_texts_labels(self.key_subtask, 'devtest')
 
         nb_classes = len(set(map(lambda k:k[1], train)))  # use set() to filter repetitive classes
 
@@ -107,7 +109,8 @@ class BaseTrainer:
         ))
 
         train = self.prepare_XY(train)
-        valid = self.prepare_XY(valid)
+        dev = self.prepare_XY(dev)
+        devtest = self.prepare_XY(devtest)
 
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
@@ -129,11 +132,21 @@ class BaseTrainer:
             train[0], train[1],
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
-            validation_data=valid,
+            validation_data=dev,
             callbacks=[bestscore, ]
         )
 
         bestscore.export_history()
+
+        if pred_prob == 1:
+            for name, data in zip(['train', 'dev', 'devtest'], [train, dev, devtest]):
+                results = self.model.predict_proba(data[0], batch_size=self.batch_size)
+                topics = data_manager.read_topic(self.key_subtask, name)
+
+                fname = '../data/pred_prob/%s_%s_%s.txt' % (self.key_subtask, name, self.config['model_name'])
+                with open(fname, 'w') as f:
+                    for result, topic in zip(results, topics):
+                        f.write(topic + '\t' + '\t'.join(map(str, result)) + '\n')
 
     def pred_classes(self, texts, verbose=0):
         X = self.prepare_X(texts)

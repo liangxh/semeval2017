@@ -87,6 +87,12 @@ def read_texts_labels(key_subtask, mode):
     return map(lambda k: (k[-1], k[-2]), lines)
 
 
+def read_topic(key_subtask, mode):
+    lines = read_data(key_subtask, mode)
+
+    return map(lambda k: k[1], lines)
+
+
 def write_id_label(key_subtask, pred_classes):  # only for subtask A
     fname = fname_clean(key_subtask, 'devtest')
     lines = open(fname, 'r').readlines()

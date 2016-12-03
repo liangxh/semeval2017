@@ -66,7 +66,7 @@ class Trainer(BaseTrainer):
                                       border_mode = 'valid',
                                       activation = 'relu',
                                       subsample_length = 1))
-
+        '''
         cnn_i_model.add(MaxPooling1D(pool_length=6, stride=2, border_mode='valid'))
 
         cnn_i_model.add(Convolution1D(nb_filter = config['nb_filter_2'],
@@ -74,7 +74,7 @@ class Trainer(BaseTrainer):
                                       border_mode = 'valid',
                                       activation = 'relu',
                                       subsample_length = 1))
-
+        '''
         cnn_i_model.add(GlobalMaxPooling1D())
 
         cnn_ii_model = Sequential()
