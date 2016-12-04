@@ -141,7 +141,6 @@ class BaseTrainer:
         devtest = data_manager.read_texts_labels(self.key_subtask, 'devtest')
 
         nb_classes = len(set(map(lambda k:k[1], train)))
-
         self.config.update(dict(
             nb_classes = nb_classes,
         ))
