@@ -16,6 +16,7 @@ DIR_COMMON = os.path.join(DIR_DATA, 'common')
 DIR_WEMB = os.path.join(DIR_DATA, 'wemb')
 DIR_MODEL = os.path.join(DIR_DATA, 'model')
 DIR_RESULT = os.path.join(DIR_DATA, 'result')
+DIR_PRED_PROB = os.path.join(DIR_DATA, 'pred_prob')
 
 
 def unify_subtask_key(key):
