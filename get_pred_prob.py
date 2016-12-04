@@ -26,7 +26,7 @@ class Trainer(BaseTrainer):
     def set_model_config(self, options):
         self.config = dict(
             optimizer = options.optimizer,
-            model_name = options.model_name
+            model_name = options.model_name,
         )
 
     def get_optimizer(self, key_optimizer):
@@ -62,7 +62,7 @@ def main():
 
     trainer = Trainer(opts)
     trainer.set_merge_num(opts.merge_num)
-    trainer.train(pred_prob=1)
+    trainer.pred_prob()
 
 if __name__ == '__main__':
     main()

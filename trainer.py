@@ -86,11 +86,10 @@ class BaseTrainer:
         fname = data_manager.fname_model_weight(self.key_subtask, self.model_name)
         self.model.load_weights(fname)
 
-    def train(self, pred_prob=0):
+    def train(self):
         # load raw texts and labels
         train = data_manager.read_texts_labels(self.key_subtask, 'train')
         dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
-        devtest = data_manager.read_texts_labels(self.key_subtask, 'devtest')
 
         nb_classes = len(set(map(lambda k:k[1], train)))  # use set() to filter repetitive classes
 
@@ -109,7 +108,6 @@ class BaseTrainer:
 
         train = self.prepare_XY(train)
         dev = self.prepare_XY(dev)
-        devtest = self.prepare_XY(devtest)
 
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
@@ -137,19 +135,40 @@ class BaseTrainer:
 
         bestscore.export_history()
 
-        if pred_prob == 1:
-            for name, data in zip(['train', 'dev', 'devtest'], [train, dev, devtest]):
-                results = self.model.predict_proba(data[0], batch_size=self.batch_size)
-                topics = data_manager.read_topic(self.key_subtask, name)
+    def pred_prob(self):
+        train = data_manager.read_texts_labels(self.key_subtask, 'train')
+        dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
+        devtest = data_manager.read_texts_labels(self.key_subtask, 'devtest')
 
-                fname = '../data/pred_prob/%s_%s_%s.txt' % (self.key_subtask, name, self.config['model_name'])
-                with open(fname, 'w') as f:
-                    if topics is not None:
-                        for result, topic in zip(results, topics):
-                            f.write(topic + '\t' + '\t'.join(map(str, result)) + '\n')
-                    else:
-                        for result in results:
-                            f.write('\t'.join(map(str, result)) + '\n')
+        nb_classes = len(set(map(lambda k:k[1], train)))
+
+        self.config.update(dict(
+            nb_classes = nb_classes,
+        ))
+
+        weights = dict(
+            Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
+        )
+
+        self.model = self.build_model(self.config, weights)
+        self.load_model_weight()
+
+        train = self.prepare_XY(train)
+        dev = self.prepare_XY(dev)
+        devtest = self.prepare_XY(devtest)
+
+        for name, data in zip(['train', 'dev', 'devtest'], [train, dev, devtest]):
+            results = self.model.predict_proba(data[0], batch_size=self.batch_size)
+            topics = data_manager.read_topic(self.key_subtask, name)
+
+            fname = '../data/pred_prob/%s_%s_%s.txt' % (self.key_subtask, name, self.config['model_name'])
+            with open(fname, 'w') as f:
+                if topics is not None:
+                    for result, topic in zip(results, topics):
+                        f.write(topic + '\t' + '\t'.join(map(str, result)) + '\n')
+                else:
+                    for result in results:
+                        f.write('\t'.join(map(str, result)) + '\n')
 
     def pred_classes(self, texts, verbose=0):
         X = self.prepare_X(texts)
