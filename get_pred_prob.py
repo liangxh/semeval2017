@@ -17,6 +17,9 @@ class Trainer(BaseTrainer):
     def get_model_name(self):
         return __file__.split('/')[-1].split('.')[0]
 
+    def set_merge_num(self, merge_num):
+        self.merge_num = merge_num
+
     def post_prepare_X(self, x):
         return [x for i in range(self.merge_num)]
 
@@ -58,6 +61,7 @@ def main():
     opts, args = optparser.parse_args()
 
     trainer = Trainer(opts)
+    trainer.set_merge_num(opts.merge_num)
     trainer.train(pred_prob=1)
 
 if __name__ == '__main__':

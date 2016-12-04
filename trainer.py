@@ -33,7 +33,6 @@ class BaseTrainer:
         self.set_model_config(options)
         self.init_indexer()
         self.model_name = self.get_model_name()
-        self.merge_num = options.merge_num
 
     def get_model_name(self):
         """
