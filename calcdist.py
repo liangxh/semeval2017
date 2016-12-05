@@ -31,14 +31,14 @@ def load_topic_probs(fname):
 
 
 def calculate_dist(probs):
-    if len(probs[0]) == 1:
-        probs = map(lambda p: [1. - p[0], p[0]], probs)
+    if len(probs[0]) == 1:  # subtask D
+        probs = map(lambda p: [p[0], 1. - p[0]], probs)
 
     ydim = len(probs[0])
     n_sample = len(probs)
     
     dist = np.zeros(ydim)
-    #dist[0] = 1.
+    # dist[0] = 1.
 
     for prob in probs:
         dist[np.argmax(prob)] += 1
@@ -50,14 +50,14 @@ def calculate_dist(probs):
 
 def main():
     optparser = OptionParser()
-    optparser.add_option('-t', '--subtask', dest='key_subtask', default='D')
+    optparser.add_option('-t', '--subtask', dest='key_subtask', default='E')
     optparser.add_option('-s', '--dataset', dest='key_mode', default='devtest')
     optparser.add_option('-m', '--model', dest='model_name', default='finki')
     opts, args = optparser.parse_args()
 
     fname = os.path.join(data_manager.DIR_PRED_PROB, '%s_%s_%s.txt'%(opts.key_subtask, opts.key_mode, opts.model_name))
 
-    topic_probs = load_topic_probs(fname)
+    topic_probs = load_topic_probs(fname)  # list of tuple (str, list of probs)
 
     fname_output = os.path.join(data_manager.DIR_RESULT, '%s_%s_%s_dist.txt'%(opts.key_subtask, opts.key_mode, opts.model_name))
 
@@ -69,7 +69,7 @@ def main():
             topic,
             '\t'.join(map(lambda f: '%.12f' % f, dist))
         ))
-    
+
     fobj_output.close()
     o = commands.getoutput(
         "perl eval/score-semeval2016-task4-subtask%s.pl " \

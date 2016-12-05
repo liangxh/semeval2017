@@ -140,17 +140,19 @@ class BaseTrainer:
         dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
         devtest = data_manager.read_texts_labels(self.key_subtask, 'devtest')
 
+        weights = dict(
+            Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
+        )
+
         nb_classes = len(set(map(lambda k:k[1], train)))
         self.config.update(dict(
             nb_classes = nb_classes,
         ))
 
-        weights = dict(
-            Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
-        )
-
         self.model = self.build_model(self.config, weights)
-        self.load_model_weight()
+        fname = '../data/model/subtask%s_%s_weight.hdf5' % (self.key_subtask, self.config['model_name'])
+        self.model.load_weights(fname)
+        # self.load_model_weight()
 
         train = self.prepare_XY(train)
         dev = self.prepare_XY(dev)

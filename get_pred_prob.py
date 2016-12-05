@@ -36,7 +36,8 @@ class Trainer(BaseTrainer):
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
     def build_model(self, config, weights):
-        json_string = open('../data/model/subtask%s_%s_config.json' % (self.key_subtask, config['model_name']), 'r').read()
+        fname = '../data/model/subtask%s_%s_config.json' % (self.key_subtask, config['model_name'])
+        json_string = open(fname, 'r').read()
         model = model_from_json(json_string)
 
         if config['nb_classes'] > 2:
@@ -53,7 +54,7 @@ class Trainer(BaseTrainer):
 
 def main():
     optparser = OptionParser()
-    optparser.add_option("-t", "--task", dest="key_subtask", default="A")
+    optparser.add_option("-t", "--task", dest="key_subtask", default="D")
     optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
     optparser.add_option("-m", "--model_name", dest="model_name", default="finki")
