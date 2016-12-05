@@ -30,21 +30,38 @@ def load_topic_probs(fname):
     return topic_probs.items()
 
 
-def calculate_dist(probs):
-    if len(probs[0]) == 1:  # subtask D
-        probs = map(lambda p: [p[0], 1. - p[0]], probs)
-
-    ydim = len(probs[0])
-    n_sample = len(probs)
-    
+def argmax_dist(probs, ydim):
     dist = np.zeros(ydim)
-    # dist[0] = 1.
 
     for prob in probs:
         dist[np.argmax(prob)] += 1
 
-    dist /= np.sum(dist)
+    return dist
 
+
+def sum_dist(probs, ydim):
+    dist = np.zeros(ydim)
+    
+    for prob in probs:
+        dist += np.asarray(prob)
+
+    return dist
+
+
+def sqr_dist(probs, ydim):
+    dist = np.zeros(ydim)
+    for prob in probs: dist += np.asarray(prob) ** 2
+    return dist
+
+
+def calculate_dist(probs, func_dist = argmax_dist):
+    if len(probs[0]) == 1:  # subtask D
+        probs = map(lambda p: [p[0], 1. - p[0]], probs)
+
+    ydim = len(probs[0])
+    dist = func_dist(probs, ydim)
+
+    dist /= np.sum(dist)
     return dist
 
 
@@ -53,7 +70,17 @@ def main():
     optparser.add_option('-t', '--subtask', dest='key_subtask', default='E')
     optparser.add_option('-s', '--dataset', dest='key_mode', default='devtest')
     optparser.add_option('-m', '--model', dest='model_name', default='finki')
+    optparser.add_option('-d', '--dist_type', dest='dist_type', default=None)
     opts, args = optparser.parse_args()
+
+    if not opts.dist_type:
+        func_dist = argmax_dist
+    else:
+        try:
+            func_dist = eval('%s_dist'%(opts.dist_type))
+        except:
+            print 'undefined dist_type'
+            return
 
     fname = os.path.join(data_manager.DIR_PRED_PROB, '%s_%s_%s.txt'%(opts.key_subtask, opts.key_mode, opts.model_name))
 
@@ -63,7 +90,7 @@ def main():
 
     fobj_output = open(fname_output, 'w')
     for topic, probs in topic_probs:
-        dist = calculate_dist(probs)
+        dist = calculate_dist(probs, func_dist)
 
         fobj_output.write('%s\t%s\n'%(
             topic,
