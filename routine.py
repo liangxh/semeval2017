@@ -37,7 +37,7 @@ def countword():
     key_subtask = sys.argv[2].upper()
 
     wc = {}
-    for mode in ["train", "dev", "devtest"]:
+    for mode in ["train", "dev", "devtest", "test_new"]:
         texts = data_manager.read_texts(key_subtask, mode)
         wc = wordcount.count(texts, wc)
 
@@ -50,7 +50,7 @@ def gold():
     
     from common import gold_builder
     for key_subtask in list('ABCDE'):
-        for mode in ['train', 'dev', 'devtest']:
+        for mode in ['train', 'dev', 'devtest', 'test_new']:
             gold_builder.build(key_subtask, mode)
 
 

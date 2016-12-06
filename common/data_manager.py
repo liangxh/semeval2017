@@ -44,11 +44,11 @@ def fname_wordcount(key_subtask):
 
 
 def fname_model_weight(key_subtask, model_name):
-    return os.path.join(DIR_MODEL, 'subtask%s_%s_weight.hdf5'%(key_subtask, model_name))
+    return os.path.join(DIR_MODEL, 'subtask%s_%s_weight_new.hdf5'%(key_subtask, model_name))
 
 
 def fname_model_config(key_subtask, model_name):
-    return os.path.join(DIR_MODEL, 'subtask%s_%s_config.json'%(key_subtask, model_name))
+    return os.path.join(DIR_MODEL, 'subtask%s_%s_config_new.json'%(key_subtask, model_name))
 
 
 def fname_gold(key_subtask, mode):

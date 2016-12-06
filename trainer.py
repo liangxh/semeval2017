@@ -20,14 +20,14 @@ from keras.preprocessing import sequence
 from keras.callbacks import ModelCheckpoint, Callback
 
 from util import tokenizer
-from common import data_manager, input_adapter, wordembed, pred_builder, gold_builder
+from common import data_manager, input_adapter, wordembed, pred_builder
 
 
 class BaseTrainer:
     def __init__(self, options):
         self.key_subtask = options.key_subtask
         self.fname_Wemb = options.fname_Wemb
-        self.nb_epoch = global_config.nb_epoch
+        self.nb_epoch = options.nb_epoch
         self.batch_size = global_config.batch_size
         self.input_length = global_config.input_length
         self.set_model_config(options)
@@ -88,8 +88,11 @@ class BaseTrainer:
 
     def train(self):
         # load raw texts and labels
-        train = data_manager.read_texts_labels(self.key_subtask, 'train')
-        dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
+        # train = data_manager.read_texts_labels(self.key_subtask, 'train')
+        # dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
+
+        train = data_manager.read_texts_labels(self.key_subtask, 'train_dev')
+        dev = data_manager.read_texts_labels(self.key_subtask, 'devtest')
 
         nb_classes = len(set(map(lambda k:k[1], train)))  # use set() to filter repetitive classes
 
@@ -136,9 +139,13 @@ class BaseTrainer:
         bestscore.export_history()
 
     def pred_prob(self):
-        train = data_manager.read_texts_labels(self.key_subtask, 'train')
-        dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
-        devtest = data_manager.read_texts_labels(self.key_subtask, 'devtest')
+        # train = data_manager.read_texts_labels(self.key_subtask, 'train')
+        # dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
+        # devtest = data_manager.read_texts_labels(self.key_subtask, 'devtest')
+
+        train = data_manager.read_texts_labels(self.key_subtask, 'train_dev')
+        dev = data_manager.read_texts_labels(self.key_subtask, 'devtest')
+        test = data_manager.read_texts_labels(self.key_subtask, 'test_new')
 
         weights = dict(
             Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
@@ -150,19 +157,21 @@ class BaseTrainer:
         ))
 
         self.model = self.build_model(self.config, weights)
-        fname = '../data/model/subtask%s_%s_weight.hdf5' % (self.key_subtask, self.config['model_name'])
+        fname = '../data/model/subtask%s_%s_weight_new.hdf5' % (self.key_subtask, self.config['model_name'])
         self.model.load_weights(fname)
         # self.load_model_weight()
 
         train = self.prepare_XY(train)
         dev = self.prepare_XY(dev)
-        devtest = self.prepare_XY(devtest)
+        # devtest = self.prepare_XY(devtest)
+        test = self.prepare_XY(test)
 
-        for name, data in zip(['train', 'dev', 'devtest'], [train, dev, devtest]):
+        # for name, data in zip(['train', 'dev', 'devtest', 'test_new'], [train, dev, devtest, test]):
+        for name, data in zip(['train', 'dev', 'test_new'], [train, dev, test]):
             results = self.model.predict_proba(data[0], batch_size=self.batch_size)
             topics = data_manager.read_topic(self.key_subtask, name)
 
-            fname = '../data/pred_prob/%s_%s_%s.txt' % (self.key_subtask, name, self.config['model_name'])
+            fname = '../data/pred_prob/%s_%s_%s_new.txt' % (self.key_subtask, name, self.config['model_name'])
             with open(fname, 'w') as f:
                 if topics is not None:
                     for result, topic in zip(results, topics):
@@ -178,7 +187,7 @@ class BaseTrainer:
 
         return labels
     
-    def evaluate(self, mode='devtest', verbose=0):
+    def evaluate(self, mode='test_new', verbose=0):
         texts = data_manager.read_texts(self.key_subtask, mode)
         labels = self.pred_classes(texts, verbose)
         pred_builder.build(self.key_subtask, mode, labels)
@@ -227,10 +236,12 @@ class SaveBestScore(Callback):
     def on_epoch_end(self, epoch, logs={}):
         self.num_epoch += 1
 
-        self.score = self.trainer.evaluate('dev')
+        # self.score = self.trainer.evaluate('dev')
+        self.score = self.trainer.evaluate('devtest')
         # print ' - val_score: %f' % self.score
 
-        devtest_score = self.trainer.evaluate('devtest')
+        # devtest_score = self.trainer.evaluate('devtest')
+        devtest_score = self.trainer.evaluate('test_new')
         self.dev_scores.append(self.score)
         self.devtest_scores.append(devtest_score)
         # print ' - devtest_score: %f'%(devtest_score)
@@ -248,6 +259,6 @@ class SaveBestScore(Callback):
         print 'best score:', self.best_score, ' corresponding epoch number:', self.best_epoch
 
     def export_history(self):
-        fname = os.path.join(data_manager.DIR_RESULT, '%s_history.json' % self.trainer.model_name)
+        fname = os.path.join(data_manager.DIR_RESULT, '%s_history_new.json' % self.trainer.model_name)
         cPickle.dump((self.dev_scores, self.devtest_scores), open(fname, 'w'))
 

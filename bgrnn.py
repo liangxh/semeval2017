@@ -92,6 +92,7 @@ class Trainer(BaseTrainer):
 def main():
     optparser = OptionParser()
     optparser.add_option("-t", "--task", dest="key_subtask", default="D")
+    optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
     optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-d", "--hidden_dims", dest="hidden_dims", type="int", default=250)
     optparser.add_option("-f", "--nb_filter", dest="nb_filter", type="int", default=100)

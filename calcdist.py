@@ -67,8 +67,8 @@ def calculate_dist(probs, func_dist = argmax_dist):
 
 def main():
     optparser = OptionParser()
-    optparser.add_option('-t', '--subtask', dest='key_subtask', default='E')
-    optparser.add_option('-s', '--dataset', dest='key_mode', default='devtest')
+    optparser.add_option('-t', '--subtask', dest='key_subtask', default='D')
+    optparser.add_option('-s', '--dataset', dest='key_mode', default='test_new')
     optparser.add_option('-m', '--model', dest='model_name', default='finki')
     optparser.add_option('-d', '--dist_type', dest='dist_type', default=None)
     opts, args = optparser.parse_args()
@@ -77,16 +77,16 @@ def main():
         func_dist = argmax_dist
     else:
         try:
-            func_dist = eval('%s_dist'%(opts.dist_type))
+            func_dist = eval('%s_dist' % opts.dist_type)
         except:
             print 'undefined dist_type'
             return
 
-    fname = os.path.join(data_manager.DIR_PRED_PROB, '%s_%s_%s.txt'%(opts.key_subtask, opts.key_mode, opts.model_name))
+    fname = os.path.join(data_manager.DIR_PRED_PROB, '%s_%s_%s_new.txt'%(opts.key_subtask, opts.key_mode, opts.model_name))
 
     topic_probs = load_topic_probs(fname)  # list of tuple (str, list of probs)
 
-    fname_output = os.path.join(data_manager.DIR_RESULT, '%s_%s_%s_dist.txt'%(opts.key_subtask, opts.key_mode, opts.model_name))
+    fname_output = os.path.join(data_manager.DIR_RESULT, '%s_%s_%s_dist_new.txt'%(opts.key_subtask, opts.key_mode, opts.model_name))
 
     fobj_output = open(fname_output, 'w')
     for topic, probs in topic_probs:

@@ -36,7 +36,7 @@ class Trainer(BaseTrainer):
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
     def build_model(self, config, weights):
-        fname = '../data/model/subtask%s_%s_config.json' % (self.key_subtask, config['model_name'])
+        fname = '../data/model/subtask%s_%s_config_new.json' % (self.key_subtask, config['model_name'])
         json_string = open(fname, 'r').read()
         model = model_from_json(json_string)
 
