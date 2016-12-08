@@ -49,7 +49,7 @@ def gold():
     """$ ./routine.py gold"""
     
     from common import gold_builder
-    for key_subtask in list('ABCDE'):
+    for key_subtask in list('BCDE'):
         for mode in ['train', 'dev', 'devtest', 'test_new']:
             gold_builder.build(key_subtask, mode)
 

@@ -134,11 +134,11 @@ def main():
 
     # test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
 
-    score = trainer.evaluate('devtest', verbose=1)
+    score = trainer.evaluate('test_new', verbose=1)
     print "Evaluation score: %.3f" % score
 
     trainer.load_model_weight()
-    score = trainer.evaluate('devtest', verbose=1)
+    score = trainer.evaluate('test_new', verbose=1)
     print "Evaluation score: %.3f" % score
 
 if __name__ == '__main__':
