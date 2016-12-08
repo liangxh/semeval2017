@@ -5,6 +5,7 @@
 @created: 2016.11.17
 """
 
+
 def filter(fname_input, fname_output, vocabs):
     vocabs = set(vocabs)
 

@@ -29,7 +29,7 @@ def get_test_labels():
 
             else:
                 if line_label[1] == line_unknown[1]:
-                    f_new.write(line_label[1] + '\t' + line_label[1] + '\t' + line_label[-1] + '\t' + line_unknown[-1] + '\n')
+                    f_new.write(line_label[0] + '\t' + line_label[1] + '\t' + line_label[-1] + '\t' + line_unknown[-1] + '\n')
 
 if __name__ == '__main__':
     get_test_labels()
