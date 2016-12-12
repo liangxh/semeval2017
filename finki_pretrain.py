@@ -75,6 +75,7 @@ class Trainer(BaseTrainer):
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
+        merged_model.add(Dense(config['nb_classes']))
 
         merged_model.compile(loss='categorical_crossentropy',
                              optimizer=self.get_optimizer(config['optimizer']),

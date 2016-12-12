@@ -43,6 +43,7 @@ class BaseTrainer:
     def init_indexer(self):
         self.text_indexer = input_adapter.get_text_indexer(self.key_subtask)
         self.label_indexer = input_adapter.get_label_indexer(self.key_subtask)
+        self.emo_indexer = input_adapter.get_emo_indexer()
 
     def set_model_config(self, options):
         raise NotImplementedError
@@ -71,6 +72,12 @@ class BaseTrainer:
 
         return y
 
+    def prepare_Y_emo(self, labels):
+        y = self.emo_indexer.idx(labels)
+        y = np_utils.to_categorical(y)
+
+        return y
+
     def prepare_XY(self, texts_labels):
         texts = map(lambda k:k[0], texts_labels)
         labels = map(lambda k:k[1], texts_labels)
@@ -81,7 +88,7 @@ class BaseTrainer:
         texts = map(lambda k:k[0], texts_labels)
         labels = map(lambda k:k[1], texts_labels)
 
-        return self.prepare_X(texts), labels
+        return self.prepare_X(texts), self.prepare_Y_emo(labels)
 
     def save_model_config(self):
         fname = data_manager.fname_model_config(self.key_subtask, self.model_name)
