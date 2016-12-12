@@ -38,6 +38,10 @@ def fname_clean(key_subtask, mode):
     return os.path.join(DIR_CLEAN, 'subtask%s_%s.txt'%(key, mode))
 
 
+def fname_clean_emo(key_subtask, mode):
+    return os.path.join(DIR_CLEAN, 'emo_tweet_en_%s.txt' % mode)
+
+
 def fname_wordcount(key_subtask):
     key = unify_subtask_key(key_subtask)
     return os.path.join(DIR_WORDCOUNT, 'subtask%s.txt'%(key))
@@ -72,6 +76,21 @@ def read_data(key_subtask, mode):
             lines.append(line.split('\t'))
 
     return lines
+
+
+def read_emo_texts_labels(key_subtask, mode):
+    fname = fname_clean_emo(key_subtask, mode)
+    lines = []
+
+    with open(fname, 'r') as fobj:
+        for line in fobj:
+            line = line.strip()
+            if line == '':
+                continue
+
+            lines.append(line.split('\t'))
+
+    return map(lambda k: (k[-1], k[-2]), lines)
 
 
 def read_texts(key_subtask, mode):

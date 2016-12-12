@@ -50,6 +50,9 @@ class BaseTrainer:
     def build_model(self, config, weights):
         raise NotImplementedError
 
+    def build_pre_model(self, config, weights):
+        raise NotImplementedError
+
     def prepare_X(self, texts):
         x = map(tokenizer.tokenize, texts)
         x = map(self.text_indexer.idx, x)
@@ -86,7 +89,7 @@ class BaseTrainer:
         fname = data_manager.fname_model_weight(self.key_subtask, self.model_name)
         self.model.load_weights(fname)
 
-    def train(self):
+    def train(self, weights):
         # load raw texts and labels
         # train = data_manager.read_texts_labels(self.key_subtask, 'train')
         # dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
@@ -97,10 +100,11 @@ class BaseTrainer:
         nb_classes = len(set(map(lambda k:k[1], train)))  # use set() to filter repetitive classes
 
         # set weights for building model
+        '''
         weights = dict(
             Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
         )
-
+        '''
         # set parameters for building model according to dataset and weights
         self.config.update(dict(
             nb_classes = nb_classes,
@@ -138,9 +142,9 @@ class BaseTrainer:
 
         bestscore.export_history()
 
-    def pre_trainer(self):
-        train = data_manager.read_texts_labels(self.key_subtask, '')
-        dev = data_manager.read_texts_labels(self.key_subtask, '')
+    def pre_train(self):
+        train = data_manager.read_emo_texts_labels(self.key_subtask, 'train')
+        dev = data_manager.read_emo_texts_labels(self.key_subtask, 'dev')
 
         nb_classes = len(set(map(lambda k:k[1], train)))  # use set() to filter repetitive classes
 
@@ -160,20 +164,17 @@ class BaseTrainer:
         train = self.prepare_XY(train)
         dev = self.prepare_XY(dev)
 
-        self.model = self.build_model(self.config, weights)
-        self.save_model_config()
-
-        bestscore = SaveBestScore(self)
+        self.model = self.build_pre_model(self.config, weights)
+        # self.save_model_config()
 
         self.model.fit(
             train[0], train[1],
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
             validation_data=dev,
-            callbacks=[bestscore, ]
         )
 
-        bestscore.export_history()
+        return self.save_model_weight()
 
     def pred_prob(self):
         # train = data_manager.read_texts_labels(self.key_subtask, 'train')
