@@ -77,6 +77,12 @@ class BaseTrainer:
 
         return self.prepare_X(texts), self.prepare_Y(labels)
 
+    def prepare_XY_emo(self, texts_labels):
+        texts = map(lambda k:k[0], texts_labels)
+        labels = map(lambda k:k[1], texts_labels)
+
+        return self.prepare_X(texts), labels
+
     def save_model_config(self):
         fname = data_manager.fname_model_config(self.key_subtask, self.model_name)
         open(fname, 'w').write(self.model.to_json())
@@ -161,8 +167,8 @@ class BaseTrainer:
             embedding_dims = weights['Wemb'].shape[1],
         ))
 
-        train = self.prepare_XY(train)
-        dev = self.prepare_XY(dev)
+        train = self.prepare_XY_emo(train)
+        dev = self.prepare_XY_emo(dev)
 
         self.model = self.build_pre_model(self.config, weights)
         # self.save_model_config()

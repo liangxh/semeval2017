@@ -84,7 +84,7 @@ def read_emo_texts_labels(key_subtask, mode):
 
     with open(fname, 'r') as fobj:
         for line in fobj:
-            line = line.strip()
+            line = line.strip().decode('utf8')
             if line == '':
                 continue
 
