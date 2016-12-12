@@ -138,6 +138,43 @@ class BaseTrainer:
 
         bestscore.export_history()
 
+    def pre_trainer(self):
+        train = data_manager.read_texts_labels(self.key_subtask, '')
+        dev = data_manager.read_texts_labels(self.key_subtask, '')
+
+        nb_classes = len(set(map(lambda k:k[1], train)))  # use set() to filter repetitive classes
+
+        # set weights for building model
+        weights = dict(
+            Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
+        )
+
+        # set parameters for building model according to dataset and weights
+        self.config.update(dict(
+            nb_classes = nb_classes,
+            max_features = self.text_indexer.size(),
+            input_length = self.input_length,
+            embedding_dims = weights['Wemb'].shape[1],
+        ))
+
+        train = self.prepare_XY(train)
+        dev = self.prepare_XY(dev)
+
+        self.model = self.build_model(self.config, weights)
+        self.save_model_config()
+
+        bestscore = SaveBestScore(self)
+
+        self.model.fit(
+            train[0], train[1],
+            batch_size=self.batch_size,
+            nb_epoch=self.nb_epoch,
+            validation_data=dev,
+            callbacks=[bestscore, ]
+        )
+
+        bestscore.export_history()
+
     def pred_prob(self):
         # train = data_manager.read_texts_labels(self.key_subtask, 'train')
         # dev = data_manager.read_texts_labels(self.key_subtask, 'dev')

@@ -12,27 +12,38 @@ pattern_http = re.compile(r'https?://\S+')
 pattern_punct = re.compile(r'[!\"\$&\'\(\)\*\+,\-\./:;=\?@\[\\\]\^_`\{\|\}~]')
 # keep # for hashtags, and keep < > for specific tokens like <LINK>
 pattern_mention = re.compile(r'@\S+')
+pattern_number = re.compile(r'(\d+)((,|\.)\d+)*')
 pattern_shorten = re.compile(r'')
+
 
 def merge_space(text):
     """turn several spaces into one space"""
     return pattern_space.sub(' ', text)
 
+
 def replace_url(text, token = '<LINK>'):
     """replace http:// or https:// in $text with $token"""
     return pattern_http.sub(token, text)
+
 
 def replace_mention(text, token = '<MENTION>'):
     """replace @USERNAME in $text with $token"""
     return pattern_mention.sub(token, text)
 
+
+def replace_num(text, token = '<NUMBER>'):
+    return pattern_number.sub(token, text)
+
+
 def remove_punct(text):
     """remove punctuation in $text"""
     return pattern_punct.sub(' ', text)
 
+
 def shorten_word(text):
     """shorten elongated words to a maximum of three character repetitions"""
     return pattern_shorten.sub()
+
 
 def preprocess(text):
     """preprocess tweet so that unnecessary tokens are deleted
@@ -47,12 +58,14 @@ def preprocess(text):
     text = text.lower()
     text = replace_url(text)
     text = replace_mention(text)
-    #text = remove_punct(text)
+    text = replace_num(text)
+    # text = remove_punct(text)
 
     # must be done at last
     text = merge_space(text).strip()
 
     return text
+
 
 def test():
     """
@@ -60,6 +73,7 @@ def test():
     """
     text = '@lxh http://www.baidu.com \'\"hello,,,, how re             you?????'
     print preprocess(text)
+
 
 def main():
     """
@@ -78,5 +92,5 @@ if __name__ == '__main__':
     you can only switch between this two modes manually
     """
     main()
-    #test()
+    # test()
 
