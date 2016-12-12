@@ -38,7 +38,7 @@ def fname_clean(key_subtask, mode):
     return os.path.join(DIR_CLEAN, 'subtask%s_%s.txt'%(key, mode))
 
 
-def fname_clean_emo(key_subtask, mode):
+def fname_clean_emo(mode):
     return os.path.join(DIR_CLEAN, 'emo_tweet_en_%s.txt' % mode)
 
 
@@ -78,13 +78,13 @@ def read_data(key_subtask, mode):
     return lines
 
 
-def read_emo_texts_labels(key_subtask, mode):
-    fname = fname_clean_emo(key_subtask, mode)
+def read_emo_texts_labels(mode):
+    fname = fname_clean_emo(mode)
     lines = []
 
     with open(fname, 'r') as fobj:
         for line in fobj:
-            line = line.strip().decode('utf8')
+            line = line.strip()
             if line == '':
                 continue
 

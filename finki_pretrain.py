@@ -145,14 +145,11 @@ def main():
     opts, args = optparser.parse_args()
 
     trainer = Trainer(opts)
-    weights = trainer.pre_train()
-
-    trainer.train(weights)
-
-    score = trainer.evaluate('test_new', verbose=1)
-    print "Evaluation score: %.3f" % score
+    trainer.pre_train()
 
     trainer.load_model_weight()
+    trainer.train()
+
     score = trainer.evaluate('test_new', verbose=1)
     print "Evaluation score: %.3f" % score
 

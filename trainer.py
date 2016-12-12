@@ -102,7 +102,7 @@ class BaseTrainer:
         fname = data_manager.fname_model_weight(self.key_subtask, self.model_name)
         self.model.load_weights(fname)
 
-    def train(self, weights):
+    def train(self):
         # load raw texts and labels
         # train = data_manager.read_texts_labels(self.key_subtask, 'train')
         # dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
@@ -113,11 +113,11 @@ class BaseTrainer:
         nb_classes = len(set(map(lambda k:k[1], train)))  # use set() to filter repetitive classes
 
         # set weights for building model
-        '''
+
         weights = dict(
             Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
         )
-        '''
+
         # set parameters for building model according to dataset and weights
         self.config.update(dict(
             nb_classes = nb_classes,
@@ -156,10 +156,12 @@ class BaseTrainer:
         bestscore.export_history()
 
     def pre_train(self):
-        train = data_manager.read_emo_texts_labels(self.key_subtask, 'train')
-        dev = data_manager.read_emo_texts_labels(self.key_subtask, 'dev')
+        all = data_manager.read_emo_texts_labels('all')
+        train = data_manager.read_emo_texts_labels('train')
+        dev = data_manager.read_emo_texts_labels('dev')
 
-        nb_classes = len(set(map(lambda k:k[1], train)))  # use set() to filter repetitive classes
+        nb_classes = len(set(map(lambda k:k[1], all)))  # use set() to filter repetitive classes
+        print 'nb_classes:', nb_classes
 
         # set weights for building model
         weights = dict(
@@ -187,7 +189,7 @@ class BaseTrainer:
             validation_data=dev,
         )
 
-        return self.save_model_weight()
+        self.save_model_weight()
 
     def pred_prob(self):
         # train = data_manager.read_texts_labels(self.key_subtask, 'train')
