@@ -7,7 +7,7 @@
 
 
 def get_test_labels():
-    for subtask in ['A', 'BD', 'CE']:
+    for subtask in [ 'BD', 'CE']:
         f_labels = open('../data/DOWNLOAD/Subtask_%s/twitter-2016test-%s.txt' % (subtask, subtask), 'r')
         f_unknowns = open('../data/test sets/SemEval2016-task4-test.subtask-%s.txt' % subtask, 'r')
 

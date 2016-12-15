@@ -72,7 +72,7 @@ class Trainer(BaseTrainer):
                                 # dropout = 0.2
                                 )
 
-        # cnn_model.add(ZeroPadding1D(int(config['filter_length'] / 2)))
+        cnn_model.add(ZeroPadding1D(int(config['filter_length'] / 2)))
         cnn_model.add(Convolution1D(nb_filter=config['nb_filter'],
                                     filter_length=config['filter_length'],
                                     border_mode='valid',

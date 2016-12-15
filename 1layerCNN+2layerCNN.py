@@ -46,6 +46,7 @@ class Trainer(BaseTrainer):
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
     def build_model(self, config, weights):
+        '''
         bgrnn_model = Sequential()
         bgrnn_model.add(Embedding(config['max_features'],
                                   config['embedding_dims'],
@@ -53,7 +54,7 @@ class Trainer(BaseTrainer):
                                   weights = [weights['Wemb']] if 'Wemb' in weights else None))
         bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims'],
                                           dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
-
+        '''
         cnn_i_model = Sequential()
         cnn_i_model.add(Embedding(config['max_features'],
                                   config['embedding_dims'],

@@ -95,6 +95,7 @@ class BaseTrainer:
         open(fname, 'w').write(self.model.to_json())
 
     def save_model_weight(self):
+        print 'Saving model weight for %s...' % self.model_name
         fname = data_manager.fname_model_weight(self.key_subtask, self.model_name)
         self.model.save_weights(fname)
 
@@ -103,8 +104,8 @@ class BaseTrainer:
         self.model.load_weights(fname)
 
     def pre_train(self):
-        train = data_manager.read_emo_texts_labels('train')
-        dev = data_manager.read_emo_texts_labels('dev')
+        train = data_manager.read_emo_texts_labels('train_cut')
+        dev = data_manager.read_emo_texts_labels('dev_cut')
 
         emos = open('../data/clean/emo_nums.txt', 'r').readlines()
         nb_classes = len(emos)

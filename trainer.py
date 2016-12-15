@@ -74,7 +74,7 @@ class BaseTrainer:
 
     def prepare_Y_emo(self, labels):
         y = self.emo_indexer.idx(labels)
-        y = np_utils.to_categorical(y)
+        y = np_utils.to_categorical(y, self.emo_indexer.size())
 
         return y
 
@@ -156,11 +156,12 @@ class BaseTrainer:
         bestscore.export_history()
 
     def pre_train(self):
-        all = data_manager.read_emo_texts_labels('all')
-        train = data_manager.read_emo_texts_labels('train')
-        dev = data_manager.read_emo_texts_labels('dev')
+        train = data_manager.read_emo_texts_labels('train_cut')
+        dev = data_manager.read_emo_texts_labels('dev_cut')
 
-        nb_classes = len(set(map(lambda k:k[1], all)))  # use set() to filter repetitive classes
+        # nb_classes = len(set(map(lambda k:k[1], all)))  # use set() to filter repetitive classes
+        emos = open('../data/clean/emo_nums.txt', 'r').readlines()
+        nb_classes = len(emos)
         print 'nb_classes:', nb_classes
 
         # set weights for building model
@@ -180,7 +181,7 @@ class BaseTrainer:
         dev = self.prepare_XY_emo(dev)
 
         self.model = self.build_pre_model(self.config, weights)
-        # self.save_model_config()
+        self.save_model_config()
 
         self.model.fit(
             train[0], train[1],

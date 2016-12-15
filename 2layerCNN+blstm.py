@@ -15,6 +15,7 @@ from keras.layers import Dense, Dropout, Activation, Embedding, Merge
 from keras.layers import LSTM, SimpleRNN, GRU
 from keras.layers import Embedding
 from keras.layers import Convolution1D, GlobalMaxPooling1D, MaxPooling1D
+from keras.layers.convolutional import ZeroPadding1D
 from keras.layers.wrappers import Bidirectional
 from keras.optimizers import RMSprop, SGD
 
@@ -60,7 +61,7 @@ class Trainer(BaseTrainer):
                                 input_length = config['input_length'],
                                 weights = [weights['Wemb']] if 'Wemb' in weights else None))
                                 #dropout = 0.2))
-
+        cnn_model.add(ZeroPadding1D(int(config['filter_length_1'] / 2)))
         cnn_model.add(Convolution1D(nb_filter = config['nb_filter_1'],
                                     filter_length = config['filter_length_1'],
                                     border_mode = 'valid',
@@ -68,7 +69,8 @@ class Trainer(BaseTrainer):
                                     subsample_length = 1))
 
         cnn_model.add(MaxPooling1D(pool_length=6, stride=2, border_mode='valid'))
-
+        
+        cnn_model.add(ZeroPadding1D(int(config['filter_length_2'] / 2)))
         cnn_model.add(Convolution1D(nb_filter = config['nb_filter_2'],
                                     filter_length = config['filter_length_2'],
                                     border_mode = 'valid',
