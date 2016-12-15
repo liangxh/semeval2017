@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
 @author: xiwen zhao
-@created: 2016.12.13
+@created: 2016.12.15
 """
 
 from optparse import OptionParser
@@ -44,38 +44,44 @@ class Trainer(BaseTrainer):
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
     def build_pre_model(self, config, weights):
-        gru_model = Sequential()
-        gru_model.add(Embedding(config['max_features'],
-                                config['embedding_dims'],
-                                input_length=config['input_length'],
-                                weights=[weights['Wemb']] if 'Wemb' in weights else None),
-                                # dropout=0.2,
-                                )
-        gru_model.add(GRU(config['rnn_output_dims_pre'], dropout_W=config['dropout_W'], dropout_U=config['dropout_U']))
+        bgrnn_model = Sequential()
+        bgrnn_model.add(Embedding(config['max_features'],
+                                  config['embedding_dims'],
+                                  input_length = config['input_length'],
+                                  weights = [weights['Wemb']] if 'Wemb' in weights else None))
+        bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims_pre'],
+                                          dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
+
+        blstm_model = Sequential()
+        blstm_model.add(Embedding(config['max_features'],
+                                  config['embedding_dims'],
+                                  input_length = config['input_length'],
+                                  weights = [weights['Wemb']] if 'Wemb' in weights else None))
+        blstm_model.add(Bidirectional(LSTM(config['rnn_output_dims_pre'],
+                                           dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
 
         cnn_model = Sequential()
         cnn_model.add(Embedding(config['max_features'],
                                 config['embedding_dims'],
                                 input_length = config['input_length'],
-                                weights = [weights['Wemb']] if 'Wemb' in weights else None),
-                                # dropout = 0.2
-                                )
+                                weights = [weights['Wemb']] if 'Wemb' in weights else None))
+                                #dropout = 0.2))
 
-        # cnn_model.add(ZeroPadding1D(int(config['filter_length'] / 2)))
-        cnn_model.add(Convolution1D(nb_filter=config['nb_filter_pre'],
-                                    filter_length=config['filter_length'],
-                                    border_mode='valid',
-                                    activation='relu',
-                                    subsample_length=1))
+        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_pre'],
+                                    filter_length = config['filter_length'],
+                                    border_mode = 'valid',
+                                    activation = 'relu',
+                                    subsample_length = 1))
 
         cnn_model.add(GlobalMaxPooling1D())
+        # cnn_model.add(Dense(config['hidden_dims']))
+        # cnn_model.add(Activation('sigmoid'))
 
         # merged model
         merged_model = Sequential()
-        merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
+        merged_model.add(Merge([bgrnn_model, blstm_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
-        merged_model.add(Dense(config['nb_classes']))
 
         merged_model.compile(loss='categorical_crossentropy',
                              optimizer=self.get_optimizer(config['optimizer']),
@@ -88,7 +94,7 @@ def main():
     optparser = OptionParser()
     optparser.add_option("-t", "--task", dest="key_subtask", default="D")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
-    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
+    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.42B.300d.txt")
     optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=1024)
     optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=1024)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
