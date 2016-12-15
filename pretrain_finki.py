@@ -30,7 +30,7 @@ class Trainer(BaseTrainer):
         self.config = dict(
             nb_filter_pre = options.nb_filter_pre,
             filter_length = options.filter_length,
-            hidden_dims = options.hidden_dims,
+            # hidden_dims = options.hidden_dims,
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
             optimizer = options.optimizer,
@@ -76,7 +76,7 @@ class Trainer(BaseTrainer):
 
         merged_model.add(Dropout(0.25))
         merged_model.add(Dense(config['nb_classes']))
-
+       
         merged_model.compile(loss='categorical_crossentropy',
                              optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])

@@ -74,7 +74,7 @@ class BaseTrainer:
 
     def prepare_Y_emo(self, labels):
         y = self.emo_indexer.idx(labels)
-        y = np_utils.to_categorical(y)
+        y = np_utils.to_categorical(y, self.config['nb_classes'])
 
         return y
 
@@ -109,7 +109,7 @@ class BaseTrainer:
 
         emos = open('../data/clean/emo_nums.txt', 'r').readlines()
         nb_classes = len(emos)
-        # print 'nb_classes:', nb_classes
+        print 'nb_classes:', nb_classes
 
         # set weights for building model
         weights = dict(

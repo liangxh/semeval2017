@@ -2,6 +2,8 @@
 # -*- coding: utf-8 -*-
 
 
+import random
+
 def split():
     f_train = open('../data/clean/emo_tweet_en_train.txt', 'w')
     f_dev = open('../data/clean/emo_tweet_en_dev.txt', 'w')
@@ -10,6 +12,7 @@ def split():
     f = open('../data/clean/emo_tweet_en_all.txt', 'r')
 
     lines = f.readlines()
+    random.shuffle(lines)    
     num = len(lines)
 
     for i in range(num):

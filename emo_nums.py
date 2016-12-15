@@ -22,17 +22,18 @@ def emo_labels():
     f_out = open('../data/clean/emo_nums.txt', 'w')
     f_cut = open('../data/clean/emo_cut.txt', 'w')    
 
-    sum_num = 0
+    sum_num = no = 0
     emo_num = sorted(emo_num.items(), key = lambda k:-k[1])
     for (emo, num) in emo_num:
-        if num < 10000: 
+        if num < 20000: 
             f_cut.write('%s\t%s\n' % (emo, num))
         else:
+            no += 1
             sum_num += num
             f_out.write('%s\t%s\n' % (emo, num))
     
     f_emo.close()
-    print sum_num
+    print sum_num, no
 
 
 if __name__ == '__main__':
