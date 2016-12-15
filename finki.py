@@ -55,15 +55,6 @@ class Trainer(BaseTrainer):
         # gru_model.add(Dense(config['hidden_dims']))
         # gru_model.add(Activation('sigmoid'))
 
-        '''
-        blstm_model = Sequential()
-        blstm_model.add(Embedding(config['max_features'],
-                                  config['embedding_dims'],
-                                  input_length = config['input_length'],
-                                  weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        blstm_model.add(Bidirectional(LSTM(100, dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
-        '''
-
         cnn_model = Sequential()
         cnn_model.add(Embedding(config['max_features'],
                                 config['embedding_dims'],

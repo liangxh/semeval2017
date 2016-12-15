@@ -72,23 +72,11 @@ class BaseTrainer:
 
         return y
 
-    def prepare_Y_emo(self, labels):
-        y = self.emo_indexer.idx(labels)
-        y = np_utils.to_categorical(y, self.emo_indexer.size())
-
-        return y
-
     def prepare_XY(self, texts_labels):
         texts = map(lambda k:k[0], texts_labels)
         labels = map(lambda k:k[1], texts_labels)
 
         return self.prepare_X(texts), self.prepare_Y(labels)
-
-    def prepare_XY_emo(self, texts_labels):
-        texts = map(lambda k:k[0], texts_labels)
-        labels = map(lambda k:k[1], texts_labels)
-
-        return self.prepare_X(texts), self.prepare_Y_emo(labels)
 
     def save_model_config(self):
         fname = data_manager.fname_model_config(self.key_subtask, self.model_name)
@@ -132,16 +120,8 @@ class BaseTrainer:
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
 
-        '''
-        checkpoint = ModelCheckpoint(
-                                 data_manager.fname_model_weight(self.key_subtask, self.model_name),
-                                 monitor = 'val_acc',
-                                 verbose = 0,
-                                 save_best_only = True,
-                                 save_weights_only = True,
-                                 mode = 'auto'
-                                )
-        '''
+        fname = '../data/model/pretrain_%s_weight.hdf5' % self.config['model_name']
+        self.model.load_weights(fname)
 
         bestscore = SaveBestScore(self)
 
@@ -155,48 +135,7 @@ class BaseTrainer:
 
         bestscore.export_history()
 
-    def pre_train(self):
-        train = data_manager.read_emo_texts_labels('train_cut')
-        dev = data_manager.read_emo_texts_labels('dev_cut')
-
-        # nb_classes = len(set(map(lambda k:k[1], all)))  # use set() to filter repetitive classes
-        emos = open('../data/clean/emo_nums.txt', 'r').readlines()
-        nb_classes = len(emos)
-        print 'nb_classes:', nb_classes
-
-        # set weights for building model
-        weights = dict(
-            Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
-        )
-
-        # set parameters for building model according to dataset and weights
-        self.config.update(dict(
-            nb_classes = nb_classes,
-            max_features = self.text_indexer.size(),
-            input_length = self.input_length,
-            embedding_dims = weights['Wemb'].shape[1],
-        ))
-
-        train = self.prepare_XY_emo(train)
-        dev = self.prepare_XY_emo(dev)
-
-        self.model = self.build_pre_model(self.config, weights)
-        self.save_model_config()
-
-        self.model.fit(
-            train[0], train[1],
-            batch_size=self.batch_size,
-            nb_epoch=self.nb_epoch,
-            validation_data=dev,
-        )
-
-        self.save_model_weight()
-
     def pred_prob(self):
-        # train = data_manager.read_texts_labels(self.key_subtask, 'train')
-        # dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
-        # devtest = data_manager.read_texts_labels(self.key_subtask, 'devtest')
-
         train = data_manager.read_texts_labels(self.key_subtask, 'train_dev')
         dev = data_manager.read_texts_labels(self.key_subtask, 'devtest')
         test = data_manager.read_texts_labels(self.key_subtask, 'test_new')
@@ -213,11 +152,9 @@ class BaseTrainer:
         self.model = self.build_model(self.config, weights)
         fname = '../data/model/subtask%s_%s_weight_new.hdf5' % (self.key_subtask, self.config['model_name'])
         self.model.load_weights(fname)
-        # self.load_model_weight()
 
         train = self.prepare_XY(train)
         dev = self.prepare_XY(dev)
-        # devtest = self.prepare_XY(devtest)
         test = self.prepare_XY(test)
 
         # for name, data in zip(['train', 'dev', 'devtest', 'test_new'], [train, dev, devtest, test]):

@@ -30,11 +30,10 @@ class Trainer(BaseTrainer):
         self.config = dict(
             nb_filter_pre = options.nb_filter_pre,
             filter_length = options.filter_length,
-            # hidden_dims = options.hidden_dims,
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
             optimizer = options.optimizer,
-            rnn_output_dims_pre = options.rnn_output_dims_pre
+            rnn_output_dims_pre = options.rnn_output_dims_pre,
         )
 
     def get_optimizer(self, key_optimizer):
@@ -86,7 +85,6 @@ class Trainer(BaseTrainer):
 
 def main():
     optparser = OptionParser()
-    optparser.add_option("-t", "--task", dest="key_subtask", default="D")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
     optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=1024)

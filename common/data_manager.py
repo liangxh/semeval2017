@@ -51,6 +51,10 @@ def fname_model_weight(key_subtask, model_name):
     return os.path.join(DIR_MODEL, 'subtask%s_%s_weight_new.hdf5'%(key_subtask, model_name))
 
 
+def fname_pretrain_model_weight(model_name):
+    return os.path.join(DIR_MODEL, '%s_weight.hdf5' % model_name)
+
+
 def fname_model_config(key_subtask, model_name):
     return os.path.join(DIR_MODEL, 'subtask%s_%s_config_new.json'%(key_subtask, model_name))
 

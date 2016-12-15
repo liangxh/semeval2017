@@ -25,7 +25,6 @@ from common import data_manager, input_adapter, wordembed, pred_builder
 
 class BaseTrainer:
     def __init__(self, options):
-        self.key_subtask = options.key_subtask
         self.fname_Wemb = options.fname_Wemb
         self.nb_epoch = options.nb_epoch
         self.batch_size = global_config.batch_size
@@ -94,9 +93,9 @@ class BaseTrainer:
         fname = data_manager.fname_model_config(self.key_subtask, self.model_name)
         open(fname, 'w').write(self.model.to_json())
 
-    def save_model_weight(self):
-        print 'Saving model weight for %s...' % self.model_name
-        fname = data_manager.fname_model_weight(self.key_subtask, self.model_name)
+    def save_pretrain_model_weight(self):
+        print 'Saving pretrain model weight for %s...' % self.model_name
+        fname = data_manager.fname_pretrain_model_weight(self.model_name)
         self.model.save_weights(fname)
 
     def load_model_weight(self):
@@ -137,4 +136,4 @@ class BaseTrainer:
             validation_data=dev,
         )
 
-        self.save_model_weight()
+        self.save_pretrain_model_weight()
