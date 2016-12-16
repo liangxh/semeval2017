@@ -74,9 +74,16 @@ class Trainer(BasePreTrainer):
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
-        merged_model.add(Dense(config['nb_classes']))
-       
-        merged_model.compile(loss='categorical_crossentropy',
+
+        if self.key_subtask == 'B' or 'D':
+            merged_model.add(Dense(1))
+            loss_type = 'binary_crossentropy'
+
+        elif self.key_subtask == 'C' or 'E':
+            merged_model.add(Dense(5))
+            loss_type = 'categorical_crossentropy'
+
+        merged_model.compile(loss=loss_type,
                              optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
 
@@ -85,6 +92,7 @@ class Trainer(BasePreTrainer):
 
 def main():
     optparser = OptionParser()
+    optparser.add_option("-t", "--task", dest="key_subtask", default="D")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
     optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=1024)

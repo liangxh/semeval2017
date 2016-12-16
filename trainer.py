@@ -43,7 +43,6 @@ class BaseTrainer:
     def init_indexer(self):
         self.text_indexer = input_adapter.get_text_indexer(self.key_subtask)
         self.label_indexer = input_adapter.get_label_indexer(self.key_subtask)
-        self.emo_indexer = input_adapter.get_emo_indexer()
 
     def set_model_config(self, options):
         raise NotImplementedError

@@ -25,6 +25,7 @@ from common import data_manager, input_adapter, wordembed, pred_builder
 
 class BasePreTrainer:
     def __init__(self, options):
+        self.key_subtask = options.key_subtask,
         self.fname_Wemb = options.fname_Wemb
         self.nb_epoch = options.nb_epoch
         self.batch_size = global_config.batch_size
@@ -75,12 +76,12 @@ class BasePreTrainer:
         return self.prepare_X_emo(texts), self.prepare_Y_emo(labels)
 
     def save_pretrain_model_config(self):
-        fname = data_manager.fname_pretrain_model_config(self.model_name)
+        fname = data_manager.fname_pretrain_model_config(self.key_subtask, self.model_name)
         open(fname, 'w').write(self.model.to_json())
 
     def save_pretrain_model_weight(self):
         print 'Saving pretrain model weight for %s...' % self.model_name
-        fname = data_manager.fname_pretrain_model_weight(self.model_name)
+        fname = data_manager.fname_pretrain_model_weight(self.key_subtask, self.model_name)
         self.model.save_weights(fname)
 
     def pre_train(self):
