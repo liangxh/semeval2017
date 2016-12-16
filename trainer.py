@@ -51,9 +51,6 @@ class BaseTrainer:
     def build_model(self, config, weights):
         raise NotImplementedError
 
-    def build_pre_model(self, config, weights):
-        raise NotImplementedError
-
     def prepare_X(self, texts):
         x = map(tokenizer.tokenize, texts)
         x = map(self.text_indexer.idx, x)
@@ -92,8 +89,6 @@ class BaseTrainer:
 
     def train(self):
         # load raw texts and labels
-        # train = data_manager.read_texts_labels(self.key_subtask, 'train')
-        # dev = data_manager.read_texts_labels(self.key_subtask, 'dev')
 
         train = data_manager.read_texts_labels(self.key_subtask, 'train_dev')
         dev = data_manager.read_texts_labels(self.key_subtask, 'devtest')
@@ -157,7 +152,6 @@ class BaseTrainer:
         dev = self.prepare_XY(dev)
         test = self.prepare_XY(test)
 
-        # for name, data in zip(['train', 'dev', 'devtest', 'test_new'], [train, dev, devtest, test]):
         for name, data in zip(['train', 'dev', 'test_new'], [train, dev, test]):
             results = self.model.predict_proba(data[0], batch_size=self.batch_size)
             topics = data_manager.read_topic(self.key_subtask, name)
@@ -227,15 +221,11 @@ class SaveBestScore(Callback):
     def on_epoch_end(self, epoch, logs={}):
         self.num_epoch += 1
 
-        # self.score = self.trainer.evaluate('dev')
         self.score = self.trainer.evaluate('devtest')
-        # print ' - val_score: %f' % self.score
 
-        # devtest_score = self.trainer.evaluate('devtest')
         devtest_score = self.trainer.evaluate('test_new')
         self.dev_scores.append(self.score)
         self.devtest_scores.append(devtest_score)
-        # print ' - devtest_score: %f'%(devtest_score)
 
         if logs.get('val_acc') > self.max_valacc:
             self.max_valacc = logs.get('val_acc')

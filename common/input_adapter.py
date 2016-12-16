@@ -22,7 +22,13 @@ def get_label_indexer(key_subtask):
     return None
 
 
-def get_emo_indexer():
+def get_text_indexer(key_subtask):
+    vocabs = data_manager.read_vocabs(key_subtask)
+
+    return Indexer(vocabs)
+
+
+def get_emo_label_indexer():
     f_emo_num = open('../data/clean/emo_nums.txt', 'r')
     lines = f_emo_num.readlines()
     emo_num = []
@@ -33,7 +39,7 @@ def get_emo_indexer():
     return Indexer(emo_num)
 
 
-def get_text_indexer(key_subtask):
-    vocabs = data_manager.read_vocabs(key_subtask)
+def get_emo_text_indexer():
+    vocabs = data_manager.read_emo_vocabs()
 
     return Indexer(vocabs)

@@ -23,7 +23,7 @@ from util import tokenizer
 from common import data_manager, input_adapter, wordembed, pred_builder
 
 
-class BaseTrainer:
+class BasePreTrainer:
     def __init__(self, options):
         self.fname_Wemb = options.fname_Wemb
         self.nb_epoch = options.nb_epoch
@@ -40,9 +40,8 @@ class BaseTrainer:
         raise NotImplementedError
 
     def init_indexer(self):
-        self.text_indexer = input_adapter.get_text_indexer(self.key_subtask)
-        self.label_indexer = input_adapter.get_label_indexer(self.key_subtask)
-        self.emo_indexer = input_adapter.get_emo_indexer()
+        self.text_indexer = input_adapter.get_emo_text_indexer()
+        self.label_indexer = input_adapter.get_emo_label_indexer()
 
     def set_model_config(self, options):
         raise NotImplementedError
@@ -53,54 +52,36 @@ class BaseTrainer:
     def build_pre_model(self, config, weights):
         raise NotImplementedError
 
-    def prepare_X(self, texts):
+    def post_prepare_X(self, x):
+        return x
+
+    def prepare_X_emo(self, texts):
         x = map(tokenizer.tokenize, texts)
         x = map(self.text_indexer.idx, x)
         x = sequence.pad_sequences(x, maxlen=self.input_length)
 
         return self.post_prepare_X(x)
 
-    def post_prepare_X(self, x):
-        return x
-
-    def prepare_Y(self, labels):
-        y = self.label_indexer.idx(labels)
-
-        if self.config['nb_classes'] > 2:
-            y = np_utils.to_categorical(y)
-
-        return y
-
     def prepare_Y_emo(self, labels):
-        y = self.emo_indexer.idx(labels)
+        y = self.label_indexer.idx(labels)
         y = np_utils.to_categorical(y, self.config['nb_classes'])
 
         return y
-
-    def prepare_XY(self, texts_labels):
-        texts = map(lambda k:k[0], texts_labels)
-        labels = map(lambda k:k[1], texts_labels)
-
-        return self.prepare_X(texts), self.prepare_Y(labels)
 
     def prepare_XY_emo(self, texts_labels):
         texts = map(lambda k:k[0], texts_labels)
         labels = map(lambda k:k[1], texts_labels)
 
-        return self.prepare_X(texts), self.prepare_Y_emo(labels)
+        return self.prepare_X_emo(texts), self.prepare_Y_emo(labels)
 
-    def save_model_config(self):
-        fname = data_manager.fname_model_config(self.key_subtask, self.model_name)
+    def save_pretrain_model_config(self):
+        fname = data_manager.fname_pretrain_model_config(self.model_name)
         open(fname, 'w').write(self.model.to_json())
 
     def save_pretrain_model_weight(self):
         print 'Saving pretrain model weight for %s...' % self.model_name
         fname = data_manager.fname_pretrain_model_weight(self.model_name)
         self.model.save_weights(fname)
-
-    def load_model_weight(self):
-        fname = data_manager.fname_model_weight(self.key_subtask, self.model_name)
-        self.model.load_weights(fname)
 
     def pre_train(self):
         train = data_manager.read_emo_texts_labels('train_cut')
@@ -127,7 +108,7 @@ class BaseTrainer:
         dev = self.prepare_XY_emo(dev)
 
         self.model = self.build_pre_model(self.config, weights)
-        self.save_model_config()
+        self.save_pretrain_model_config()
 
         self.model.fit(
             train[0], train[1],

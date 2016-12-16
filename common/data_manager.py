@@ -44,7 +44,11 @@ def fname_clean_emo(mode):
 
 def fname_wordcount(key_subtask):
     key = unify_subtask_key(key_subtask)
-    return os.path.join(DIR_WORDCOUNT, 'subtask%s.txt'%(key))
+    return os.path.join(DIR_WORDCOUNT, 'subtask%s.txt' % key)
+
+
+def fname_emo_wordcount():
+    return os.path.join(DIR_WORDCOUNT, 'emo_tweet_en_all_cut.txt')
 
 
 def fname_model_weight(key_subtask, model_name):
@@ -57,6 +61,10 @@ def fname_pretrain_model_weight(model_name):
 
 def fname_model_config(key_subtask, model_name):
     return os.path.join(DIR_MODEL, 'subtask%s_%s_config_new.json'%(key_subtask, model_name))
+
+
+def fname_pretrain_model_config(model_name):
+    return os.path.join(DIR_MODEL, '%s_config.json' % model_name)
 
 
 def fname_gold(key_subtask, mode):
@@ -82,7 +90,7 @@ def read_data(key_subtask, mode):
     return lines
 
 
-def read_emo_texts_labels(mode):
+def read_emo_data(mode):
     fname = fname_clean_emo(mode)
     lines = []
 
@@ -94,7 +102,20 @@ def read_emo_texts_labels(mode):
 
             lines.append(line.split('\t'))
 
+    return lines
+
+
+def read_emo_texts_labels(mode):
+    lines = read_emo_data(mode)
+
     return map(lambda k: (k[-1], k[-2]), lines)
+
+
+def read_emo_texts(mode):
+    # mode: train_cut, dev_cut, all_cut
+    lines = read_emo_data(mode)
+
+    return map(lambda k: k[-1], lines)
 
 
 def read_texts(key_subtask, mode):
@@ -340,11 +361,37 @@ def read_wordcount(key_subtask):
     return wc  # list of tuple
 
 
+def read_emo_wordcount():
+    fname = fname_emo_wordcount()
+    emos_tweets = open(fname, 'r').readlines()
+    wc = []
+
+    for emo_tweet in emos_tweets:
+        emo_tweet = emo_tweet.strip()
+
+        if emo_tweet == '': continue
+
+        params = emo_tweet.split('\t')
+        w = params[0]
+        c = int(params[1])
+
+        wc.append((w, c))
+
+    return wc
+
+
 def read_vocabs(key_subtask):
     all_wc = read_wordcount(key_subtask)
 
     vocabs = map(lambda k: k[0], all_wc)  # list of str
-    return vocabs    
+    return vocabs
+
+
+def read_emo_vocabs():
+    all_wc = read_emo_wordcount()
+
+    vocabs = map(lambda k: k[0], all_wc)
+    return vocabs
 
 
 def read_vocabs_topN(key_subtask, n):

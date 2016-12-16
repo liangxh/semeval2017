@@ -6,7 +6,7 @@
 """
 
 from optparse import OptionParser
-from pre_trainer import BaseTrainer
+from pre_trainer import BasePreTrainer
 from common import data_manager
 
 from keras.models import Sequential
@@ -19,7 +19,7 @@ from keras.layers.wrappers import Bidirectional
 from keras.optimizers import RMSprop, SGD
 
 
-class Trainer(BaseTrainer):
+class Trainer(BasePreTrainer):
     def get_model_name(self):
         return __file__.split('/')[-1].split('.')[0]
 

@@ -27,21 +27,34 @@ def clean():
 
 def countword():
     """$ ./routine.py countword KEY_SUBTASK"""
-
+    '''
     if len(sys.argv) < 3:
         print "required arguments: KEY_SUBTASK"
         return
-
+    '''
     from util import wordcount
 
-    key_subtask = sys.argv[2].upper()
+    # key_subtask = sys.argv[2].upper()
 
     wc = {}
-    for mode in ["train", "dev", "devtest", "test_new"]:
-        texts = data_manager.read_texts(key_subtask, mode)
-        wc = wordcount.count(texts, wc)
+    for key_subtask in list('BCDE'):
+        for mode in ["train", "dev", "devtest", "test_new"]:
+            texts = data_manager.read_texts(key_subtask, mode)
+            wc = wordcount.count(texts, wc)
 
-    output_fname = data_manager.fname_wordcount(key_subtask)
+        output_fname = data_manager.fname_wordcount(key_subtask)
+        wordcount.export(wc.items(), output_fname)
+
+
+def countword_emo():
+    """$ ./routine.py countword_emo"""
+    from util import wordcount
+
+    wc = {}
+    texts = data_manager.read_emo_texts('all_cut')
+    wc = wordcount.count(texts, wc)
+
+    output_fname = data_manager.fname_emo_wordcount()
     wordcount.export(wc.items(), output_fname)
 
 
