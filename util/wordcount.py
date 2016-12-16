@@ -6,7 +6,9 @@
 """
 
 import tokenizer
-
+import sys
+reload(sys)
+sys.setdefaultencoding('utf8')
 
 def count(texts, wc = None):
     """count the frequency of distinct tokens
@@ -26,7 +28,7 @@ def count(texts, wc = None):
     for text in texts:
         tokens = tokenizer.tokenize(text.strip())
         for token in tokens:
-            token = token.decode("utf8")
+            # token = token.decode("utf8")
             if token in wc:
                 wc[token] += 1
             else:
