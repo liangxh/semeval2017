@@ -65,7 +65,9 @@ class BasePreTrainer:
 
     def prepare_Y_emo(self, labels):
         y = self.label_indexer.idx(labels)
-        y = np_utils.to_categorical(y, self.config['nb_classes'])
+        # y = np_utils.to_categorical(y, self.config['dense_output_dims'])
+        if self.config['dense_output_dims'] > 2:
+            y = np_utils.to_categorical(y)
 
         return y
 

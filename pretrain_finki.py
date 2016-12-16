@@ -28,6 +28,8 @@ class Trainer(BasePreTrainer):
 
     def set_model_config(self, options):
         self.config = dict(
+            dense_output_dims = self.get_densedims_lossty()[0],
+            loss_type = self.get_densedims_lossty()[1],
             nb_filter_pre = options.nb_filter_pre,
             filter_length = options.filter_length,
             dropout_W = options.dropout_W,
@@ -35,6 +37,13 @@ class Trainer(BasePreTrainer):
             optimizer = options.optimizer,
             rnn_output_dims_pre = options.rnn_output_dims_pre,
         )
+
+    def get_densedims_lossty(self):
+        if self.key_subtask in list('BD'):
+            return 1, 'binary_crossentropy'
+
+        elif self.key_subtask in list('CE'):
+            return 5, 'catogorical_crossentropy'
 
     def get_optimizer(self, key_optimizer):
         if key_optimizer == 'rmsprop':
@@ -74,15 +83,9 @@ class Trainer(BasePreTrainer):
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
+        merged_model.add(Dense(self.config['dense_output_dims']))
 
-        if self.key_subtask == 'B' or 'D':
-            merged_model.add(Dense(1))
-            loss_type = 'binary_crossentropy'
-
-        elif self.key_subtask == 'C' or 'E':
-            merged_model.add(Dense(5))
-            loss_type = 'categorical_crossentropy'
-
+        loss_type = self.config['loss_type']
         merged_model.compile(loss=loss_type,
                              optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
