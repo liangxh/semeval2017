@@ -26,13 +26,6 @@ class Trainer(BasePreTrainer):
     def post_prepare_X(self, x):
         return [x for _ in range(2)]
 
-    def get_densedims_lossty(self):
-        if self.key_subtask in list('BD'):
-            return 1, 'binary_crossentropy'
-
-        elif self.key_subtask in list('CE'):
-            return 5, 'catogorical_crossentropy'
-
     def set_model_config(self, options):
         self.config = dict(
             nb_filter_pre = options.nb_filter_pre,
@@ -81,10 +74,9 @@ class Trainer(BasePreTrainer):
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
-        merged_model.add(Dense(self.get_densedims_lossty()[0]))
-
-        loss_type = self.config[self.get_densedims_lossty()[1]]
-        merged_model.compile(loss=loss_type,
+        merged_model.add(Dense(self.output_dims))
+        
+        merged_model.compile(loss=self.loss_type,
                              optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
 

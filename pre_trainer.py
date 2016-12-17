@@ -25,7 +25,7 @@ from common import data_manager, input_adapter, wordembed, pred_builder
 
 class BasePreTrainer:
     def __init__(self, options):
-        self.key_subtask = options.key_subtask,
+        self.key_subtask = ''.join(options.key_subtask),
         self.fname_Wemb = options.fname_Wemb
         self.nb_epoch = options.nb_epoch
         self.batch_size = global_config.batch_size
@@ -33,6 +33,8 @@ class BasePreTrainer:
         self.set_model_config(options)
         self.init_indexer()
         self.model_name = self.get_model_name()
+        self.loss_type = self.get_densedims_lossty()[1]
+        self.output_dims = self.get_densedims_lossty()[0]
 
     def get_model_name(self):
         """
@@ -52,6 +54,15 @@ class BasePreTrainer:
 
     def build_pre_model(self, config, weights):
         raise NotImplementedError
+    
+    def get_densedims_lossty(self):
+        if self.key_subtask in list('BD'):
+            return 1, 'binary_crossentropy'
+
+        elif self.key_subtask in list('CE'):
+            return 5, 'catogorical_crossentropy'
+
+        else: print 'Wrong key_subtask'
 
     def post_prepare_X(self, x):
         return x
@@ -66,7 +77,7 @@ class BasePreTrainer:
     def prepare_Y_emo(self, labels):
         y = self.label_indexer.idx(labels)
         # y = np_utils.to_categorical(y, self.config['dense_output_dims'])
-        if self.config['dense_output_dims'] > 2:
+        if self.output_dims > 2:
             y = np_utils.to_categorical(y)
 
         return y
@@ -93,6 +104,7 @@ class BasePreTrainer:
         emos = open('../data/clean/emo_nums.txt', 'r').readlines()
         nb_classes = len(emos)
         print 'nb_classes:', nb_classes
+        print 'key_subtask:', self.key_subtask
 
         # set weights for building model
         weights = dict(
