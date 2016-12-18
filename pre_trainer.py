@@ -127,11 +127,51 @@ class BasePreTrainer:
         self.model = self.build_pre_model(self.config, weights)
         self.save_pretrain_model_config()
 
+        bestscore = SaveBestScore(self)
+
         self.model.fit(
             train[0], train[1],
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
             validation_data=dev,
+            callbacks=[bestscore, ]
+
         )
 
-        self.save_pretrain_model_weight()
+
+class SaveBestScore(Callback):
+    def __init__(self, trainer):
+        self.trainer = trainer
+        self.key_subtask = trainer.key_subtask
+        self.score = 0
+        self.best_score = None
+        self.max_valacc = 0
+        self.prior_score = (lambda a, b: a > b) \
+            if self.key_subtask in ['A', 'B'] else (lambda a, b: a < b)
+        self.dev_scores = []
+        self.devtest_scores = []
+        self.num_epoch = 0
+        self.best_epoch = 0
+
+        super(Callback, self).__init__()
+
+    def on_epoch_end(self, epoch, logs={}):
+        self.num_epoch += 1
+
+        self.score = self.trainer.evaluate('dev_cut')
+
+        if logs.get('val_acc') > self.max_valacc:
+            self.max_valacc = logs.get('val_acc')
+
+        if self.best_score is None or self.prior_score(self.score, self.best_score):
+            self.best_score = self.score
+            self.best_epoch = self.num_epoch
+            self.trainer.save_pretrain_model_weight()
+
+    def on_train_end(self, logs={}):
+        print 'maximum val_acc: ', self.max_valacc
+        print 'best score:', self.best_score, ' corresponding epoch number:', self.best_epoch
+
+    def export_history(self):
+        fname = os.path.join(data_manager.DIR_RESULT, '%s_history_new.json' % self.trainer.model_name)
+        cPickle.dump((self.dev_scores, self.devtest_scores), open(fname, 'w'))
