@@ -75,6 +75,7 @@ class Trainer(BasePreTrainer):
 
         merged_model.add(Dropout(0.25))
         merged_model.add(Dense(self.output_dims))
+        print '<dense output dimension>:', self.output_dims
         
         merged_model.compile(loss=self.loss_type,
                              optimizer=self.get_optimizer(config['optimizer']),
@@ -88,8 +89,8 @@ def main():
     optparser.add_option("-t", "--task", dest="key_subtask", default="D")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
     optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
-    optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=1024)
-    optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=1024)
+    optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=200)
+    optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=100)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)

@@ -114,7 +114,7 @@ class BaseTrainer:
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
 
-        fname = '../data/model/pretrain_%s_weight.hdf5' % self.config['model_name']
+        fname = '../data/model/pretrain_%s_%s_weight.hdf5' % (self.model_name, self.key_subtask)
         self.model.load_weights(fname)
 
         bestscore = SaveBestScore(self)

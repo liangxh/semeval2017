@@ -56,11 +56,13 @@ class BasePreTrainer:
         raise NotImplementedError
     
     def get_densedims_lossty(self):
+        self.key_subtask = ''.join(self.key_subtask)
+
         if self.key_subtask in list('BD'):
             return 1, 'binary_crossentropy'
 
         elif self.key_subtask in list('CE'):
-            return 5, 'catogorical_crossentropy'
+            return 5, 'categorical_crossentropy'
 
         else: print 'Wrong key_subtask'
 
@@ -78,7 +80,7 @@ class BasePreTrainer:
         y = self.label_indexer.idx(labels)
         # y = np_utils.to_categorical(y, self.config['dense_output_dims'])
         if self.output_dims > 2:
-            y = np_utils.to_categorical(y)
+            y = np_utils.to_categorical(y, self.config['nb_classes'])
 
         return y
 
