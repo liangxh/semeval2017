@@ -24,7 +24,7 @@ class Trainer(BasePreTrainer):
         return __file__.split('/')[-1].split('.')[0]
 
     def post_prepare_X(self, x):
-        return [x for _ in range(3)]
+        return [x for _ in range(2)]
 
     def set_model_config(self, options):
         self.config = dict(
@@ -48,7 +48,7 @@ class Trainer(BasePreTrainer):
                                   config['embedding_dims'],
                                   input_length = config['input_length'],
                                   weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims_pre'],
+        bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims'],
                                           dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
 
         blstm_model = Sequential()
@@ -56,7 +56,7 @@ class Trainer(BasePreTrainer):
                                   config['embedding_dims'],
                                   input_length = config['input_length'],
                                   weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        blstm_model.add(Bidirectional(LSTM(config['rnn_output_dims_pre'],
+        blstm_model.add(Bidirectional(LSTM(config['rnn_output_dims'],
                                            dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
 
         cnn_model = Sequential()
@@ -65,9 +65,9 @@ class Trainer(BasePreTrainer):
                                 input_length = config['input_length'],
                                 weights = [weights['Wemb']] if 'Wemb' in weights else None))
                                 #dropout = 0.2))
-
-        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_pre'],
-                                    filter_length = config['filter_length'],
+        # cnn_model.add(ZeroPadding1D(int(config['filter_length_1'] / 2)))
+        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_1'],
+                                    filter_length = config['filter_length_1'],
                                     border_mode = 'valid',
                                     activation = 'relu',
                                     subsample_length = 1))
@@ -81,9 +81,10 @@ class Trainer(BasePreTrainer):
         merged_model.add(Merge([bgrnn_model, blstm_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
-        merged_model.add(Dense(config['nb_classes']))
+        merged_model.add(Dense(self.output_dims))
+        print '<dense output dimension>:', self.output_dims
 
-        merged_model.compile(loss='categorical_crossentropy',
+        merged_model.compile(loss=self.loss_type,
                              optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
 
@@ -92,10 +93,11 @@ class Trainer(BasePreTrainer):
 
 def main():
     optparser = OptionParser()
+    optparser.add_option("-t", "--task", dest="key_subtask", default="D")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
-    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.42B.300d.txt")
-    optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=1024)
-    optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=1024)
+    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
+    optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=200)
+    optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=100)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
