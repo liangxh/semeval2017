@@ -134,9 +134,44 @@ class BasePreTrainer:
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
             validation_data=dev,
-            callbacks=[bestscore, ]
-
+            callbacks=[bestscore,]
         )
+
+    def pred_classes(self, texts, verbose=0):
+        X = self.prepare_X_emo(texts)
+        Y = self.model.predict_classes(X, batch_size=self.batch_size, verbose=verbose)
+        labels = map(self.label_indexer.label, Y)
+
+        return labels
+
+    def evaluate(self, mode='dev_cut', verbose=0):
+        texts = data_manager.read_emo_texts(mode)
+        labels = self.pred_classes(texts, verbose)
+        pred_builder.build(self.key_subtask, mode, labels)
+
+        o = commands.getoutput(
+             "perl eval/score-semeval2016-task4-subtask%s.pl " \
+             "../data/result/%s_%s_gold.txt " \
+             "../data/result/%s_%s_pred.txt" % (
+                self.key_subtask,
+                self.key_subtask, mode,
+                self.key_subtask, mode,
+            )
+        )
+
+        try:
+            o = o.strip()
+            lines = o.split("\n")
+            score = lines[-1].split("\t")[-1]
+            return float(score)
+        except:
+            print "trainer.evaluate: [warning] invalid output file for semeval measures tool"
+            print [o, ]
+            return None
+
+    def simple_evaluate(self, test):
+        test = self.prepare_XY_emo(test)
+        return self.model.evaluate(*test, batch_size=self.batch_size)
 
 
 class SaveBestScore(Callback):
@@ -148,8 +183,6 @@ class SaveBestScore(Callback):
         self.max_valacc = 0
         self.prior_score = (lambda a, b: a > b) \
             if self.key_subtask in ['A', 'B'] else (lambda a, b: a < b)
-        self.dev_scores = []
-        self.devtest_scores = []
         self.num_epoch = 0
         self.best_epoch = 0
 
@@ -171,7 +204,3 @@ class SaveBestScore(Callback):
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
         print 'best score:', self.best_score, ' corresponding epoch number:', self.best_epoch
-
-    def export_history(self):
-        fname = os.path.join(data_manager.DIR_RESULT, '%s_history_new.json' % self.trainer.model_name)
-        cPickle.dump((self.dev_scores, self.devtest_scores), open(fname, 'w'))
