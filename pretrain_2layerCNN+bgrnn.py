@@ -28,13 +28,15 @@ class Trainer(BasePreTrainer):
 
     def set_model_config(self, options):
         self.config = dict(
-            nb_filter_pre_1 = options.nb_filter_pre_1,
-            nb_filter_pre_2 = options.nb_filter_pre_2,
-            filter_length = options.filter_length,
+            nb_filter_1 = options.nb_filter_1,
+            nb_filter_2 = options.nb_filter_2,
+            filter_length_1 = options.filter_length_1,
+            filter_length_2 = options.filter_length_2,
+            hidden_dims = options.hidden_dims,
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
             optimizer = options.optimizer,
-            rnn_output_dims_pre = options.rnn_output_dims_pre,
+            rnn_output_dims = options.rnn_output_dims
         )
 
     def get_optimizer(self, key_optimizer):
@@ -49,7 +51,7 @@ class Trainer(BasePreTrainer):
                                   config['embedding_dims'],
                                   input_length = config['input_length'],
                                   weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims_pre'],
+        bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims'],
                                           dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
 
         cnn_model = Sequential()
@@ -59,21 +61,23 @@ class Trainer(BasePreTrainer):
                                 weights = [weights['Wemb']] if 'Wemb' in weights else None))
                                 #dropout = 0.2))
 
-        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_pre_1'],
-                                    filter_length = config['filter_length'],
+        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_1'],
+                                    filter_length = config['filter_length_1'],
                                     border_mode = 'valid',
                                     activation = 'relu',
                                     subsample_length = 1))
 
         cnn_model.add(MaxPooling1D(pool_length=6, stride=2, border_mode='valid'))
 
-        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_pre_2'],
-                                    filter_length = config['filter_length'],
+        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_2'],
+                                    filter_length = config['filter_length_2'],
                                     border_mode = 'valid',
                                     activation = 'relu',
                                     subsample_length = 1))
 
         cnn_model.add(GlobalMaxPooling1D())
+        # cnn_model.add(Dense(config['hidden_dims']))
+        # cnn_model.add(Activation('sigmoid'))
 
         # merged model
         merged_model = Sequential()
@@ -95,10 +99,12 @@ def main():
     optparser.add_option("-t", "--task", dest="key_subtask", default="D")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
     optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
-    optparser.add_option("-f", "--nb_filter_pre_1", dest="nb_filter_pre_1", type="int", default=200)
-    optparser.add_option("-F", "--nb_filter_pre_2", dest="nb_filter_pre_2", type="int", default=200)
-    optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=100)
-    optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
+    optparser.add_option("-d", "--hidden_dims", dest="hidden_dims", type="int", default=250)
+    optparser.add_option("-f", "--nb_filter_1", dest="nb_filter_1", type="int", default=200)
+    optparser.add_option("-F", "--nb_filter_2", dest="nb_filter_2", type="int", default=200)
+    optparser.add_option("-r", "--rnn_output_dims", dest="rnn_output_dims", type="int", default=100)
+    optparser.add_option("-l", "--filter_length_1", dest="filter_length_1", type="int", default=6)
+    optparser.add_option("-L", "--filter_length_2", dest="filter_length_2", type="int", default=3)
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
     optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
