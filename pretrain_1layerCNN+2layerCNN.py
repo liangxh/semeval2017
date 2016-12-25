@@ -2,12 +2,11 @@
 # -*- coding: utf-8 -*-
 """
 @author: xiwen zhao
-@created: 2016.12.2
+@created: 2016.12.25
 """
 
-
 from optparse import OptionParser
-from trainer import BaseTrainer
+from pre_trainer import BasePreTrainer
 from common import data_manager
 
 from keras.models import Sequential
@@ -15,16 +14,17 @@ from keras.layers import Dense, Dropout, Activation, Embedding, Merge
 from keras.layers import LSTM, SimpleRNN, GRU
 from keras.layers import Embedding
 from keras.layers import Convolution1D, GlobalMaxPooling1D, MaxPooling1D
+from keras.layers.convolutional import ZeroPadding1D
 from keras.layers.wrappers import Bidirectional
 from keras.optimizers import RMSprop, SGD
 
 
-class Trainer(BaseTrainer):
+class Trainer(BasePreTrainer):
     def get_model_name(self):
         return __file__.split('/')[-1].split('.')[0]
 
     def post_prepare_X(self, x):
-        return [x for i in range(2)]
+        return [x for _ in range(2)]
 
     def set_model_config(self, options):
         self.config = dict(
@@ -44,16 +44,7 @@ class Trainer(BaseTrainer):
         else:  # 'sgd'
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
-    def build_model(self, config, weights):
-        """
-        bgrnn_model = Sequential()
-        bgrnn_model.add(Embedding(config['max_features'],
-                                  config['embedding_dims'],
-                                  input_length = config['input_length'],
-                                  weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims'],
-                                          dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
-        """
+    def build_pre_model(self, config, weights):
         cnn_i_model = Sequential()
         cnn_i_model.add(Embedding(config['max_features'],
                                   config['embedding_dims'],
@@ -94,19 +85,13 @@ class Trainer(BaseTrainer):
 
         # merged model
         merged_model = Sequential()
-        # merged_model.add(Merge([bgrnn_model, cnn_i_model, cnn_ii_model], mode='concat', concat_axis=1))
         merged_model.add(Merge([cnn_i_model, cnn_ii_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
+        merged_model.add(Dense(self.output_dims))
+        print '<dense output dimension>:', self.output_dims
 
-        if config['nb_classes'] > 2:
-            merged_model.add(Dense(config['nb_classes'], activation='softmax'))
-            loss_type = 'categorical_crossentropy'
-        else:
-            merged_model.add(Dense(1, activation='sigmoid'))
-            loss_type = 'binary_crossentropy'
-
-        merged_model.compile(loss=loss_type,
+        merged_model.compile(loss=self.loss_type,
                              optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
 
@@ -129,16 +114,8 @@ def main():
     opts, args = optparser.parse_args()
 
     trainer = Trainer(opts)
-    trainer.train()
-
-    # test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
-
-    score = trainer.evaluate('test_new', verbose=1)
-    print "Evaluation score: %.3f" % score
-
-    trainer.load_model_weight()
-    score = trainer.evaluate('test_new', verbose=1)
-    print "Evaluation score: %.3f" % score
+    trainer.pre_train()
 
 if __name__ == '__main__':
     main()
+
