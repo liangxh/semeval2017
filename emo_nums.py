@@ -25,10 +25,10 @@ def emo_labels():
     sum_num = no = 0
     emo_num = sorted(emo_num.items(), key = lambda k:-k[1])
     for (emo, num) in emo_num:
-        if num < 20000: 
+        no += 1
+        if no > 5: 
             f_cut.write('%s\t%s\n' % (emo, num))
         else:
-            no += 1
             sum_num += num
             f_out.write('%s\t%s\n' % (emo, num))
     

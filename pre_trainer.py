@@ -164,12 +164,14 @@ class SaveBestScore(Callback):
 
         if logs.get('val_acc') > self.max_valacc:
             self.max_valacc = logs.get('val_acc')
-
+            self.best_epoch = self.num_epoch
+            self.trainer.save_pretrain_model_weight()
+        '''
         if self.best_score is None or self.prior_score(self.score, self.best_score):
             self.best_score = self.score
             self.best_epoch = self.num_epoch
             self.trainer.save_pretrain_model_weight()
-
+        '''
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
-        print 'best score:', self.best_score, ' corresponding epoch number:', self.best_epoch
+        # print 'best score:', self.best_score, ' corresponding epoch number:', self.best_epoch

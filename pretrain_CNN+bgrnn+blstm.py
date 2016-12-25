@@ -24,7 +24,7 @@ class Trainer(BasePreTrainer):
         return __file__.split('/')[-1].split('.')[0]
 
     def post_prepare_X(self, x):
-        return [x for _ in range(2)]
+        return [x for _ in range(3)]
 
     def set_model_config(self, options):
         self.config = dict(
@@ -48,7 +48,7 @@ class Trainer(BasePreTrainer):
                                   config['embedding_dims'],
                                   input_length = config['input_length'],
                                   weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims'],
+        bgrnn_model.add(Bidirectional(GRU(config['rnn_output_dims_pre'],
                                           dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
 
         blstm_model = Sequential()
@@ -56,7 +56,7 @@ class Trainer(BasePreTrainer):
                                   config['embedding_dims'],
                                   input_length = config['input_length'],
                                   weights = [weights['Wemb']] if 'Wemb' in weights else None))
-        blstm_model.add(Bidirectional(LSTM(config['rnn_output_dims'],
+        blstm_model.add(Bidirectional(LSTM(config['rnn_output_dims_pre'],
                                            dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
 
         cnn_model = Sequential()
@@ -66,8 +66,8 @@ class Trainer(BasePreTrainer):
                                 weights = [weights['Wemb']] if 'Wemb' in weights else None))
                                 #dropout = 0.2))
         # cnn_model.add(ZeroPadding1D(int(config['filter_length_1'] / 2)))
-        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_1'],
-                                    filter_length = config['filter_length_1'],
+        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_pre'],
+                                    filter_length = config['filter_length'],
                                     border_mode = 'valid',
                                     activation = 'relu',
                                     subsample_length = 1))

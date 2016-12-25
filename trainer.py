@@ -113,10 +113,10 @@ class BaseTrainer:
 
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
-
+         
         fname = '../data/model/pretrain_%s_%s_weight.hdf5' % (self.model_name, self.key_subtask)
         self.model.load_weights(fname)
-
+        
         bestscore = SaveBestScore(self)
 
         self.model.fit(
@@ -212,6 +212,7 @@ class SaveBestScore(Callback):
             if self.key_subtask in ['A', 'B'] else (lambda a, b: a < b)
         self.dev_scores = []
         self.devtest_scores = []
+        self.val_accs = []
         self.num_epoch = 0
         self.best_epoch = 0
 
@@ -225,11 +226,13 @@ class SaveBestScore(Callback):
         devtest_score = self.trainer.evaluate('test_new')
         self.dev_scores.append(self.score)
         self.devtest_scores.append(devtest_score)
+        self.val_accs.append(logs.get('val_acc'))
 
         if logs.get('val_acc') > self.max_valacc:
             self.max_valacc = logs.get('val_acc')
 
         if self.best_score is None or self.prior_score(self.score, self.best_score):
+            print '\n<epoch>:', self.num_epoch, '<score>:', self.score
             self.best_score = self.score
             self.best_epoch = self.num_epoch
             self.trainer.save_model_weight()
@@ -239,6 +242,6 @@ class SaveBestScore(Callback):
         print 'best score:', self.best_score, ' corresponding epoch number:', self.best_epoch
 
     def export_history(self):
-        fname = os.path.join(data_manager.DIR_RESULT, '%s_history_new.json' % self.trainer.model_name)
-        cPickle.dump((self.dev_scores, self.devtest_scores), open(fname, 'w'))
+        fname = os.path.join(data_manager.DIR_HISTORY, '%s_history_new.json' % self.trainer.model_name)
+        cPickle.dump((self.val_accs, self.dev_scores, self.devtest_scores), open(fname, 'w'))
 

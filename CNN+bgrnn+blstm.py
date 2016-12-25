@@ -117,7 +117,7 @@ def main():
     optparser.add_option("-f", "--nb_filter_1", dest="nb_filter_1", type="int", default=200)
     optparser.add_option("-F", "--nb_filter_2", dest="nb_filter_2", type="int", default=200)
     optparser.add_option("-r", "--rnn_output_dims", dest="rnn_output_dims", type="int", default=100)
-    optparser.add_option("-l", "--filter_length_1", dest="filter_length_1", type="int", default=6)
+    optparser.add_option("-l", "--filter_length_1", dest="filter_length_1", type="int", default=3)
     optparser.add_option("-L", "--filter_length_2", dest="filter_length_2", type="int", default=3)
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
