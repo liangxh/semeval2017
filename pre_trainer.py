@@ -103,7 +103,7 @@ class BasePreTrainer:
         train = data_manager.read_emo_texts_labels('train_cut')
         dev = data_manager.read_emo_texts_labels('dev_cut')
 
-        emos = open('../data/clean/emo_nums.txt', 'r').readlines()
+        emos = open('../data/clean/emo_nums_save.txt', 'r').readlines()
         nb_classes = len(emos)
         print 'nb_classes:', nb_classes
         print 'key_subtask:', self.key_subtask
