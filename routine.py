@@ -54,7 +54,7 @@ def countword_emo():
     texts = data_manager.read_emo_texts('all_cut')
     wc = wordcount.count(texts, wc)
 
-    output_fname = data_manager.fname_emo_wordcount()
+    output_fname = '../data/wordcount/emo_tweet.txt'
     wordcount.export(wc.items(), output_fname)
 
 

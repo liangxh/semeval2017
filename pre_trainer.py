@@ -25,7 +25,6 @@ from common import data_manager, input_adapter, wordembed, pred_builder
 
 class BasePreTrainer:
     def __init__(self, options):
-        self.key_subtask = ''.join(options.key_subtask),
         self.fname_Wemb = options.fname_Wemb
         self.nb_epoch = options.nb_epoch
         self.batch_size = global_config.batch_size
@@ -33,8 +32,6 @@ class BasePreTrainer:
         self.set_model_config(options)
         self.init_indexer()
         self.model_name = self.get_model_name()
-        self.loss_type = self.get_densedims_lossty()[1]
-        self.output_dims = self.get_densedims_lossty()[0]
 
     def get_model_name(self):
         """
@@ -54,17 +51,6 @@ class BasePreTrainer:
 
     def build_pre_model(self, config, weights):
         raise NotImplementedError
-    
-    def get_densedims_lossty(self):
-        self.key_subtask = ''.join(self.key_subtask)
-
-        if self.key_subtask in list('BD'):
-            return 1, 'binary_crossentropy'
-
-        elif self.key_subtask in list('CE'):
-            return 5, 'categorical_crossentropy'
-
-        else: print 'Wrong key_subtask'
 
     def post_prepare_X(self, x):
         return x
@@ -78,8 +64,9 @@ class BasePreTrainer:
 
     def prepare_Y_emo(self, labels):
         y = self.label_indexer.idx(labels)
+
         # y = np_utils.to_categorical(y, self.config['dense_output_dims'])
-        if self.output_dims > 2:
+        if self.config['nb_classes'] > 2:
             y = np_utils.to_categorical(y, self.config['nb_classes'])
 
         return y
@@ -91,22 +78,21 @@ class BasePreTrainer:
         return self.prepare_X_emo(texts), self.prepare_Y_emo(labels)
 
     def save_pretrain_model_config(self):
-        fname = data_manager.fname_pretrain_model_config(self.key_subtask, self.model_name)
+        fname = data_manager.fname_pretrain_model_config(self.model_name)
         open(fname, 'w').write(self.model.to_json())
 
     def save_pretrain_model_weight(self):
-        print 'Saving pretrain model weight for %s...' % self.model_name
-        fname = data_manager.fname_pretrain_model_weight(self.key_subtask, self.model_name)
+        print '\nSaving pretrain model weight for %s...' % self.model_name
+        fname = data_manager.fname_pretrain_model_weight(self.model_name)
         self.model.save_weights(fname)
 
     def pre_train(self):
         train = data_manager.read_emo_texts_labels('train_cut')
         dev = data_manager.read_emo_texts_labels('dev_cut')
 
-        emos = open('../data/clean/emo_nums_save.txt', 'r').readlines()
+        emos = open('../data/clean/emo_nums_chosen.txt', 'r').readlines()
         nb_classes = len(emos)
         print 'nb_classes:', nb_classes
-        print 'key_subtask:', self.key_subtask
 
         # set weights for building model
         weights = dict(
@@ -134,7 +120,7 @@ class BasePreTrainer:
             batch_size=self.batch_size,
             nb_epoch=self.nb_epoch,
             validation_data=dev,
-            callbacks=[bestscore,]
+            callbacks=[bestscore, ]
         )
 
     def simple_evaluate(self, mode='dev_cut'):
@@ -146,12 +132,9 @@ class BasePreTrainer:
 class SaveBestScore(Callback):
     def __init__(self, trainer):
         self.trainer = trainer
-        self.key_subtask = trainer.key_subtask
         self.score = 0
         self.best_score = None
         self.max_valacc = 0
-        self.prior_score = (lambda a, b: a > b) \
-            if self.key_subtask in ['A', 'B'] else (lambda a, b: a < b)
         self.num_epoch = 0
         self.best_epoch = 0
 
@@ -160,18 +143,10 @@ class SaveBestScore(Callback):
     def on_epoch_end(self, epoch, logs={}):
         self.num_epoch += 1
 
-        self.score = self.trainer.simple_evaluate('dev_cut')
-
         if logs.get('val_acc') > self.max_valacc:
             self.max_valacc = logs.get('val_acc')
             self.best_epoch = self.num_epoch
             self.trainer.save_pretrain_model_weight()
-        '''
-        if self.best_score is None or self.prior_score(self.score, self.best_score):
-            self.best_score = self.score
-            self.best_epoch = self.num_epoch
-            self.trainer.save_pretrain_model_weight()
-        '''
+
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
-        # print 'best score:', self.best_score, ' corresponding epoch number:', self.best_epoch

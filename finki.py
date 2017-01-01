@@ -34,12 +34,13 @@ class Trainer(BaseTrainer):
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
             optimizer = options.optimizer,
-            rnn_output_dims = options.rnn_output_dims
+            rnn_output_dims = options.rnn_output_dims,
+            lr = options.lr,
         )
 
     def get_optimizer(self, key_optimizer):
         if key_optimizer == 'rmsprop':
-            return RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
+            return RMSprop(lr=self.config['lr'], rho=0.9, epsilon=1e-06)
         else:  # 'sgd'
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
@@ -81,10 +82,10 @@ class Trainer(BaseTrainer):
         merged_model.add(Dropout(0.25))
 
         if config['nb_classes'] > 2:
-            merged_model.add(Dense(config['nb_classes'], activation='softmax'))
+            merged_model.add(Dense(config['nb_classes'], activation='softmax', name='dense_e'))
             loss_type = 'categorical_crossentropy'
         else:
-            merged_model.add(Dense(1, activation='sigmoid'))
+            merged_model.add(Dense(1, activation='sigmoid', name='dense_d'))
             loss_type = 'binary_crossentropy'
 
         merged_model.compile(loss=loss_type,
@@ -106,6 +107,7 @@ def main():
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
     optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
+    optparser.add_option("-v", "--learning rate", dest="lr", default="0.001")
     opts, args = optparser.parse_args()
 
     trainer = Trainer(opts)

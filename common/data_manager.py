@@ -47,24 +47,20 @@ def fname_wordcount(key_subtask):
     return os.path.join(DIR_WORDCOUNT, 'subtask%s.txt' % key)
 
 
-def fname_emo_wordcount():
-    return os.path.join(DIR_WORDCOUNT, 'emo_tweet_en_all_cut.txt')
-
-
 def fname_model_weight(key_subtask, model_name):
     return os.path.join(DIR_MODEL, 'subtask%s_%s_weight_new.hdf5'%(key_subtask, model_name))
 
 
-def fname_pretrain_model_weight(key_subtask, model_name):
-    return os.path.join(DIR_MODEL, '%s_%s_weight.hdf5' % (model_name, key_subtask))
+def fname_pretrain_model_weight(model_name):
+    return os.path.join(DIR_MODEL, '%s_weight.hdf5' % model_name)
 
 
 def fname_model_config(key_subtask, model_name):
     return os.path.join(DIR_MODEL, 'subtask%s_%s_config_new.json'%(key_subtask, model_name))
 
 
-def fname_pretrain_model_config(key_subtask, model_name):
-    return os.path.join(DIR_MODEL, '%s_%s_config.json' % (model_name, key_subtask))
+def fname_pretrain_model_config(model_name):
+    return os.path.join(DIR_MODEL, '%s_config.json' % model_name)
 
 
 def fname_gold(key_subtask, mode):
@@ -362,7 +358,7 @@ def read_wordcount(key_subtask):
 
 
 def read_emo_wordcount():
-    fname = fname_emo_wordcount()
+    fname = '../data/wordcount/emo_tweet.txt'
     emos_tweets = open(fname, 'r').readlines()
     wc = []
 
