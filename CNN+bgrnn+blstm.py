@@ -37,12 +37,13 @@ class Trainer(BaseTrainer):
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
             optimizer = options.optimizer,
-            rnn_output_dims = options.rnn_output_dims
+            rnn_output_dims = options.rnn_output_dims,
+            lr = options.lr
         )
 
     def get_optimizer(self, key_optimizer):
         if key_optimizer == 'rmsprop':
-            return RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
+            return RMSprop(lr=self.config['lr'], rho=0.9, epsilon=1e-06)
         else:  # 'sgd'
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
@@ -69,21 +70,14 @@ class Trainer(BaseTrainer):
                                 input_length = config['input_length'],
                                 weights = [weights['Wemb']] if 'Wemb' in weights else None))
                                 #dropout = 0.2))
+
         # cnn_model.add(ZeroPadding1D(int(config['filter_length_1'] / 2)))
         cnn_model.add(Convolution1D(nb_filter = config['nb_filter_1'],
                                     filter_length = config['filter_length_1'],
                                     border_mode = 'valid',
                                     activation = 'relu',
                                     subsample_length = 1))
-        '''
-        cnn_model.add(MaxPooling1D(pool_length=6, stride=2, border_mode='valid'))
 
-        cnn_model.add(Convolution1D(nb_filter = config['nb_filter_2'],
-                                    filter_length = config['filter_length_2'],
-                                    border_mode = 'valid',
-                                    activation = 'relu',
-                                    subsample_length = 1))
-        '''
         cnn_model.add(GlobalMaxPooling1D())
         # cnn_model.add(Dense(config['hidden_dims']))
         # cnn_model.add(Activation('sigmoid'))
@@ -95,10 +89,10 @@ class Trainer(BaseTrainer):
         merged_model.add(Dropout(0.25))
 
         if config['nb_classes'] > 2:
-            merged_model.add(Dense(config['nb_classes'], activation='softmax'))
+            merged_model.add(Dense(config['nb_classes'], activation='softmax', name="dense_e"))
             loss_type = 'categorical_crossentropy'
         else:
-            merged_model.add(Dense(1, activation='sigmoid'))
+            merged_model.add(Dense(1, activation='sigmoid', name="dense_d"))
             loss_type = 'binary_crossentropy'
 
         merged_model.compile(loss=loss_type,
@@ -122,12 +116,11 @@ def main():
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
     optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
+    optparser.add_option("-v", "--learning rate", dest="lr", type="float", default=0.001)
     opts, args = optparser.parse_args()
 
     trainer = Trainer(opts)
     trainer.train()
-
-    # test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
 
     score = trainer.evaluate('test_new', verbose=1)
     print "Evaluation score: %.3f" % score

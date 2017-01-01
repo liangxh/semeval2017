@@ -36,12 +36,13 @@ class Trainer(BasePreTrainer):
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
             optimizer = options.optimizer,
-            rnn_output_dims = options.rnn_output_dims
+            rnn_output_dims = options.rnn_output_dims,
+            lr = options.lr
         )
 
     def get_optimizer(self, key_optimizer):
         if key_optimizer == 'rmsprop':
-            return RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
+            return RMSprop(lr=self.config['lr'], rho=0.9, epsilon=1e-06)
         else:  # 'sgd'
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
@@ -84,10 +85,10 @@ class Trainer(BasePreTrainer):
         merged_model.add(Merge([bgrnn_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
-        merged_model.add(Dense(self.output_dims))
-        print '<dense output dimension>:', self.output_dims
+        merged_model.add(Dense(self.config['nb_classes'], name="dense_pretrain"))
+        print '<dense output dimension>:', self.config['nb_classes']
 
-        merged_model.compile(loss=self.loss_type,
+        merged_model.compile(loss="categorical_crossentropy",
                              optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
 
@@ -96,7 +97,6 @@ class Trainer(BasePreTrainer):
 
 def main():
     optparser = OptionParser()
-    optparser.add_option("-t", "--task", dest="key_subtask", default="D")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
     optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-d", "--hidden_dims", dest="hidden_dims", type="int", default=250)
@@ -108,6 +108,7 @@ def main():
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
     optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
+    optparser.add_option("-v", "--learning rate", dest="lr", type="float", default=0.001)
     opts, args = optparser.parse_args()
 
     trainer = Trainer(opts)
