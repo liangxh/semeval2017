@@ -98,7 +98,7 @@ class Trainer(BasePreTrainer):
 def main():
     optparser = OptionParser()
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
-    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
+    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt")
     optparser.add_option("-d", "--hidden_dims", dest="hidden_dims", type="int", default=250)
     optparser.add_option("-f", "--nb_filter_1", dest="nb_filter_1", type="int", default=200)
     optparser.add_option("-F", "--nb_filter_2", dest="nb_filter_2", type="int", default=200)
