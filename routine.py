@@ -25,6 +25,18 @@ def clean():
             data_cleaner.clean(input_fname, output_fname)
 
 
+def clean_emo():
+    from common import data_cleaner
+
+    for root, dirs, files in os.walk(data_manager.DIR_CLEAN):
+        for fname in files:
+            if 'emo_tweet' in fname and 'cut' in fname:
+                input_fname = os.path.join(root, fname)
+                output_fname = os.path.join(root, fname[:-4] + '_new.txt')
+                print 'removing tweets less than 5 words in file %s' % fname
+                data_cleaner.clean_emo(input_fname, output_fname)
+
+
 def countword():
     """$ ./routine.py countword KEY_SUBTASK"""
     '''

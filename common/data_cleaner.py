@@ -4,7 +4,7 @@
 @created: 2016.11.13
 """
 
-from util import tweet
+from util import tweet, tokenizer
 
 
 def clean(input_fname, output_fname):
@@ -16,7 +16,18 @@ def clean(input_fname, output_fname):
             continue
 
         items[-1] = tweet.preprocess(items[-1])
-        f.write('\t'.join(items)+'\n')
+
     f.close()
 
 
+def clean_emo(input_fname, output_fname):
+    f = open(output_fname, 'w')
+    texts = open(input_fname, 'r').read()[:-1].split('\n')
+
+    for text in texts:
+        items = text.split('\t')
+
+        tokens = tokenizer.tokenize(items[-1].strip())
+        if len(tokens) >= 5:
+            f.write('\t'.join(items)+'\n')
+    f.close()
