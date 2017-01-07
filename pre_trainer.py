@@ -46,9 +46,6 @@ class BasePreTrainer:
     def set_model_config(self, options):
         raise NotImplementedError
 
-    def build_model(self, config, weights):
-        raise NotImplementedError
-
     def build_pre_model(self, config, weights):
         raise NotImplementedError
 
@@ -65,7 +62,6 @@ class BasePreTrainer:
     def prepare_Y_emo(self, labels):
         y = self.label_indexer.idx(labels)
 
-        # y = np_utils.to_categorical(y, self.config['dense_output_dims'])
         if self.config['nb_classes'] > 2:
             y = np_utils.to_categorical(y, self.config['nb_classes'])
 
@@ -87,8 +83,8 @@ class BasePreTrainer:
         self.model.save_weights(fname)
 
     def pre_train(self):
-        train = data_manager.read_emo_texts_labels('train_cut')
-        dev = data_manager.read_emo_texts_labels('dev_cut')
+        train = data_manager.read_emo_texts_labels('train_cut_new')
+        dev = data_manager.read_emo_texts_labels('dev_cut_new')
 
         emos = open('../data/clean/emo_nums_chosen.txt', 'r').readlines()
         nb_classes = len(emos)
@@ -137,11 +133,16 @@ class SaveBestScore(Callback):
         self.max_valacc = 0
         self.num_epoch = 0
         self.best_epoch = 0
+        self.accs = []
+        self.val_accs =[]
 
         super(Callback, self).__init__()
 
     def on_epoch_end(self, epoch, logs={}):
         self.num_epoch += 1
+
+        self.accs.append(logs.get('acc'))
+        self.val_accs.append(logs.get('val_acc'))
 
         if logs.get('val_acc') > self.max_valacc:
             self.max_valacc = logs.get('val_acc')
@@ -150,3 +151,7 @@ class SaveBestScore(Callback):
 
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
+
+    def export_history(self):
+        fname = os.path.join(data_manager.DIR_HISTORY, 'pretrain_%s_history.json' % (self.trainer.model_name))
+        cPickle.dump((self.accs, self.val_accs), open(fname, 'w'))

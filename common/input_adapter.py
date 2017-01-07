@@ -31,12 +31,12 @@ def get_text_indexer(key_subtask):
 def get_emo_label_indexer():
     f_emo_num = open('../data/clean/emo_nums_chosen.txt', 'r')
     lines = f_emo_num.readlines()
-    emo_num = []
+    emos= []
 
     for line in lines:
-        emo_num.append(line.split('\t')[0])
+        emos.append(line.split('\t')[0])
 
-    return Indexer(emo_num)
+    return Indexer(emos)
 
 
 def get_emo_text_indexer():
