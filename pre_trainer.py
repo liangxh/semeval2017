@@ -119,6 +119,8 @@ class BasePreTrainer:
             callbacks=[bestscore, ]
         )
 
+        bestscore.export_history()
+
     def simple_evaluate(self, mode='dev_cut'):
         dev = data_manager.read_emo_texts_labels(mode)
         dev = self.prepare_XY_emo(dev)
