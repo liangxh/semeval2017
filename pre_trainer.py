@@ -155,5 +155,5 @@ class SaveBestScore(Callback):
         print 'maximum val_acc: ', self.max_valacc
 
     def export_history(self):
-        fname = os.path.join(data_manager.DIR_HISTORY, 'pretrain_%s_history.json' % (self.trainer.model_name))
+        fname = os.path.join(data_manager.DIR_HISTORY, '%s_history.json' % self.trainer.model_name)
         cPickle.dump((self.accs, self.val_accs), open(fname, 'w'))

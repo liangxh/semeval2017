@@ -74,7 +74,7 @@ class Trainer(BasePreTrainer):
         merged_model = Sequential()
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
-        merged_model.add(Dropout(0.25))
+        # merged_model.add(Dropout(0.25))
 
         merged_model.add(Dense(self.config['nb_classes'], name='dense_pretrain'))
         print '<dense output dimension>:', self.config['nb_classes']
