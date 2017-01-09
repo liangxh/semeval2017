@@ -39,7 +39,7 @@ class Trainer(BasePreTrainer):
 
     def get_optimizer(self, key_optimizer):
         if key_optimizer == 'rmsprop':
-            return RMSprop(lr=self.config['lr'], rho=0.9, epsilon=1e-06)
+            return RMSprop(lr=self.config['lr'], rho=0.9, epsilon=1e-08)
         else:  # 'sgd'
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
@@ -89,7 +89,7 @@ class Trainer(BasePreTrainer):
 def main():
     optparser = OptionParser()
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
-    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
+    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt")
     optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=200)
     optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=100)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)

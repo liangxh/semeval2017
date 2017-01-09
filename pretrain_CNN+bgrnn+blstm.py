@@ -39,7 +39,7 @@ class Trainer(BasePreTrainer):
 
     def get_optimizer(self, key_optimizer):
         if key_optimizer == 'rmsprop':
-            return RMSprop(lr=self.config['lr'], rho=0.9, epsilon=1e-06)
+            return RMSprop(lr=self.config['lr'], rho=0.9, epsilon=1e-08)
         else:  # 'sgd'
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
@@ -82,7 +82,7 @@ class Trainer(BasePreTrainer):
         merged_model.add(Merge([bgrnn_model, blstm_model, cnn_model], mode='concat', concat_axis=1))
 
         merged_model.add(Dropout(0.25))
-        merged_model.add(Dense(self.config['nb_classes'], name="dense_pretrain"))
+        merged_model.add(Dense(self.config['nb_classes'], activation='softmax', name="dense_pretrain"))
         print '<dense output dimension>:', self.config['nb_classes']
 
         merged_model.compile(loss="categorical_crossentropy",

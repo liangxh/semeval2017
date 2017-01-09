@@ -41,7 +41,7 @@ class Trainer(BaseTrainer):
 
     def get_optimizer(self, key_optimizer):
         if key_optimizer == 'rmsprop':
-            return RMSprop(lr=0.001, rho=0.9, epsilon=1e-06)
+            return RMSprop(lr=0.001, rho=0.9, epsilon=1e-08)
         else:  # 'sgd'
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
