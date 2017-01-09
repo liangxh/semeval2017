@@ -83,8 +83,8 @@ class BasePreTrainer:
         self.model.save_weights(fname)
 
     def pre_train(self):
-        train = data_manager.read_emo_texts_labels('train_cut_new')
-        dev = data_manager.read_emo_texts_labels('dev_cut_new')
+        train = data_manager.read_emo_texts_labels('train_cut')
+        dev = data_manager.read_emo_texts_labels('dev_cut')
 
         emos = open('../data/clean/emo_nums_chosen.txt', 'r').readlines()
         nb_classes = len(emos)

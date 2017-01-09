@@ -44,6 +44,7 @@ class Trainer(BasePreTrainer):
             return SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=False)
 
     def build_pre_model(self, config, weights):
+        """
         cnn_model = Sequential()
         cnn_model.add(Embedding(config['max_features'],
                                 config['embedding_dims'],
@@ -57,16 +58,24 @@ class Trainer(BasePreTrainer):
                                     subsample_length=1))
 
         cnn_model.add(GlobalMaxPooling1D())
+        """
+        blstm_model = Sequential()
+        blstm_model.add(Embedding(config['max_features'],
+                                  config['embedding_dims'],
+                                  input_length = config['input_length'],
+                                  weights = [weights['Wemb']] if 'Wemb' in weights else None))
+        blstm_model.add(Bidirectional(LSTM(config['rnn_output_dims_pre'],
+                                           dropout_W=config['dropout_W'], dropout_U=config['dropout_U'])))
 
         # merged_model.add(Dropout(0.25))
 
-        cnn_model.add(Dense(self.config['nb_classes']))
+        blstm_model.add(Dense(self.config['nb_classes']))
 
-        cnn_model.compile(loss='categorical_crossentropy',
+        blstm_model.compile(loss='categorical_crossentropy',
                           optimizer=self.get_optimizer(config['optimizer']),
                           metrics=['accuracy'])
 
-        return cnn_model
+        return blstm_model
 
 
 def main():
@@ -76,8 +85,8 @@ def main():
     optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=200)
     optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=100)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
-    optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
-    optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
+    optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0)
+    optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0)
     optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
     optparser.add_option("-v", "--learning rate", dest="lr", default="0.001")
     opts, args = optparser.parse_args()

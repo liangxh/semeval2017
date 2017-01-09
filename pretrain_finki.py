@@ -74,12 +74,12 @@ class Trainer(BasePreTrainer):
         merged_model = Sequential()
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
-        # merged_model.add(Dropout(0.25))
+        merged_model.add(Dropout(0.25))
 
-        merged_model.add(Dense(self.config['nb_classes'], name='dense_pretrain'))
-        print '<dense output dimension>:', self.config['nb_classes']
+        merged_model.add(Dense(self.output_dims, name='dense_pretrain'))
+        print '<dense output dimension>:', self.output_dims
 
-        merged_model.compile(loss='categorical_crossentropy',
+        merged_model.compile(loss=self.loss_type,
                              optimizer=self.get_optimizer(config['optimizer']),
                              metrics=['accuracy'])
 
@@ -88,8 +88,9 @@ class Trainer(BasePreTrainer):
 
 def main():
     optparser = OptionParser()
+    optparser.add_option("-t", "--task", dest="key_subtask", default="D")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
-    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt")
+    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=200)
     optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=100)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
