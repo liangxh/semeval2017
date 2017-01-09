@@ -76,7 +76,7 @@ class Trainer(BasePreTrainer):
 
         # merged_model.add(Dropout(0.25))
 
-        merged_model.add(Dense(self.config['nb_classes'], name='dense_pretrain'))
+        merged_model.add(Dense(self.config['nb_classes'], activation='softmax', name='dense_pretrain'))
         print '<dense output dimension>:', self.config['nb_classes']
 
         merged_model.compile(loss='categorical_crossentropy',
@@ -89,7 +89,7 @@ class Trainer(BasePreTrainer):
 def main():
     optparser = OptionParser()
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
-    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt")
+    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-f", "--nb_filter_pre", dest="nb_filter_pre", type="int", default=200)
     optparser.add_option("-r", "--rnn_output_dims_pre", dest="rnn_output_dims_pre", type="int", default=100)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
