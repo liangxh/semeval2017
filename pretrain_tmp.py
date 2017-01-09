@@ -94,6 +94,8 @@ def main():
     trainer = Trainer(opts)
     trainer.pre_train()
 
+    trainer.export_pred()
+
 if __name__ == '__main__':
     main()
 

@@ -83,8 +83,8 @@ class BasePreTrainer:
         self.model.save_weights(fname)
 
     def pre_train(self):
-        train = data_manager.read_emo_texts_labels('train_cut')
-        dev = data_manager.read_emo_texts_labels('dev_cut')
+        train = data_manager.read_emo_texts_labels('train_cut_new')
+        dev = data_manager.read_emo_texts_labels('dev_cut_new')
 
         emos = open('../data/clean/emo_nums_chosen.txt', 'r').readlines()
         nb_classes = len(emos)
@@ -121,10 +121,29 @@ class BasePreTrainer:
 
         bestscore.export_history()
 
+    def pred_classes(self, texts, verbose=0):
+        X = self.prepare_X_emo(texts)
+        Y = self.model.predict_classes(X, batch_size=self.batch_size, verbose=verbose)
+        labels = map(self.label_indexer.label, Y)
+
+        return labels
+    """
     def simple_evaluate(self, mode='dev_cut'):
         dev = data_manager.read_emo_texts_labels(mode)
         dev = self.prepare_XY_emo(dev)
         return self.model.evaluate(*dev, batch_size=self.batch_size)
+    """
+    def export_pred(self, mode="dev_cut_new"):
+        texts = data_manager.read_emo_texts(mode)
+        labels = self.pred_classes(texts)
+
+        ofname = data_manager.fname_pretrain_pred(self.model_name)
+        fobj = open(ofname, 'w')
+
+        for text, label in zip(texts, labels):
+            fobj.write('%s\t%s\n' % (label, text))
+
+        fobj.close()
 
 
 class SaveBestScore(Callback):

@@ -63,6 +63,10 @@ def fname_pretrain_model_config(model_name):
     return os.path.join(DIR_MODEL, '%s_config.json' % model_name)
 
 
+def fname_pretrain_pred(model_name):
+    return os.path.join(DIR_RESULT, '%s_pred.txt' % model_name)
+
+
 def fname_gold(key_subtask, mode):
     return os.path.join(DIR_RESULT, '%s_%s_gold.txt'%(key_subtask, mode))
 
