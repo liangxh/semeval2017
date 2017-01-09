@@ -30,7 +30,7 @@ def clean_emo():
 
     for root, dirs, files in os.walk(data_manager.DIR_CLEAN):
         for fname in files:
-            if 'emo_tweet' in fname and 'cut' in fname and '_new_new.txt' not in fname:
+            if 'emo_tweet' in fname and 'cut' in fname and '_new.txt' not in fname:
                 input_fname = os.path.join(root, fname)
                 output_fname = os.path.join(root, fname[:-4] + '_new.txt')
                 print 'removing tweets less than 5 words in file %s' % fname
