@@ -59,7 +59,7 @@ def preprocess(text):
     text = replace_url(text)
     text = replace_mention(text)
     text = replace_num(text)
-    text = remove_punct(text)
+    # text = remove_punct(text)
 
     # must be done at last
     text = merge_space(text).strip()
