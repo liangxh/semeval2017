@@ -178,6 +178,7 @@ class BaseTrainer:
 
         o = commands.getoutput(
              "perl eval/score-semeval2016-task4-subtask%s.pl " \
+             # "perl eval/SemEval2017_task4_test_scorer_subtaskE.pl" \
              "../data/result/%s_%s_gold.txt " \
              "../data/result/%s_%s_pred.txt" % (
                 self.key_subtask, 
@@ -237,12 +238,13 @@ class SaveBestScore(Callback):
             self.best_score = self.score
             self.best_epoch = self.num_epoch
             self.trainer.save_model_weight()
-
+        
         if self.num_epoch == self.best_epoch + 1:
+            print '\n<NEXT>', '<score>:', self.score
             self.trainer.save_model_weight()
-            self.best_epoch = self.num_epoch
-            self.best_score = self.score
-
+            # self.best_epoch = self.num_epoch
+            # self.best_score = self.score
+        
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
         print 'best score:', self.best_score, ' corresponding epoch number:', self.best_epoch
