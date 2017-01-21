@@ -113,7 +113,8 @@ class BaseTrainer:
 
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
-        
+
+        """
         fname = '../data/model/pretrain_%s_weight.hdf5' % self.model_name
         self.model.load_weights(fname, by_name=True)
         
@@ -128,6 +129,10 @@ class BaseTrainer:
         )
 
         bestscore.export_history()
+        """
+
+        fname = '../data/model/subtaskE_finki_weight_new.hdf5'
+        self.model.load_weights(fname)
 
     def pred_prob(self):
         train = data_manager.read_texts_labels(self.key_subtask, 'train_dev')
@@ -175,18 +180,23 @@ class BaseTrainer:
         texts = data_manager.read_texts(self.key_subtask, mode)
         labels = self.pred_classes(texts, verbose)
         pred_builder.build(self.key_subtask, mode, labels)
-
+        """
         o = commands.getoutput(
-             "perl eval/score-semeval2016-task4-subtask%s.pl " \
-             # "perl eval/SemEval2017_task4_test_scorer_subtaskE.pl" \
+             # "perl eval/score-semeval2016-task4-subtask%s.pl " \
+             "perl eval/SemEval2017_task4_test_scorer_subtask%s.pl" \
              "../data/result/%s_%s_gold.txt " \
              "../data/result/%s_%s_pred.txt" % (
-                self.key_subtask, 
+                self.key_subtask,
                 self.key_subtask, mode, 
                 self.key_subtask, mode,
             )
         )
-
+        """
+        o = commands.getoutput(
+             "perl eval/SemEval2017_task4_test_scorer_subtask%s.pl" \
+             "../data/4E-English/SemEval2016_task4_subtaskE_test_gold.txt" \
+             "../data/4E-English/SemEval2017-task4-dev.subtaskCE.english.INPUT.txt"
+        )
         try:
             o = o.strip()
             lines = o.split("\n")
