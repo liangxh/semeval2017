@@ -114,7 +114,6 @@ class BaseTrainer:
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
 
-        """
         fname = '../data/model/pretrain_%s_weight.hdf5' % self.model_name
         self.model.load_weights(fname, by_name=True)
         
@@ -129,15 +128,11 @@ class BaseTrainer:
         )
 
         bestscore.export_history()
-        """
-
-        fname = '../data/model/subtaskE_finki_weight_new.hdf5'
-        self.model.load_weights(fname)
 
     def pred_prob(self):
         train = data_manager.read_texts_labels(self.key_subtask, 'train_dev')
         dev = data_manager.read_texts_labels(self.key_subtask, 'devtest')
-        test = data_manager.read_texts_labels(self.key_subtask, 'test_new')
+        test = data_manager.read_texts_labels(self.key_subtask, 'test_2017')
 
         weights = dict(
             Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
@@ -183,7 +178,7 @@ class BaseTrainer:
         """
         o = commands.getoutput(
              # "perl eval/score-semeval2016-task4-subtask%s.pl " \
-             "perl eval/SemEval2017_task4_test_scorer_subtask%s.pl" \
+             "perl eval/SemEval2017_task4_test_scorer_subtask%s.pl " \
              "../data/result/%s_%s_gold.txt " \
              "../data/result/%s_%s_pred.txt" % (
                 self.key_subtask,
@@ -191,12 +186,7 @@ class BaseTrainer:
                 self.key_subtask, mode,
             )
         )
-        """
-        o = commands.getoutput(
-             "perl eval/SemEval2017_task4_test_scorer_subtask%s.pl" \
-             "../data/4E-English/SemEval2016_task4_subtaskE_test_gold.txt" \
-             "../data/4E-English/SemEval2017-task4-dev.subtaskCE.english.INPUT.txt"
-        )
+
         try:
             o = o.strip()
             lines = o.split("\n")
@@ -206,7 +196,7 @@ class BaseTrainer:
             print "trainer.evaluate: [warning] invalid output file for semeval measures tool"
             print [o, ]
             return None
-
+        """
     def simple_evaluate(self, test):
         test = self.prepare_XY(test)
         return self.model.evaluate(*test, batch_size=self.batch_size)
@@ -234,7 +224,7 @@ class SaveBestScore(Callback):
 
         self.score = self.trainer.evaluate('devtest')
 
-        devtest_score = self.trainer.evaluate('test_new')
+        devtest_score = self.trainer.evaluate('test_2017')
 
         self.dev_scores.append(self.score)
         self.devtest_scores.append(devtest_score)
@@ -252,8 +242,6 @@ class SaveBestScore(Callback):
         if self.num_epoch == self.best_epoch + 1:
             print '\n<NEXT>', '<score>:', self.score
             self.trainer.save_model_weight()
-            # self.best_epoch = self.num_epoch
-            # self.best_score = self.score
         
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
