@@ -62,8 +62,8 @@ class BasePreTrainer:
     def prepare_Y_emo(self, labels):
         y = self.label_indexer.idx(labels)
 
-        if self.config['nb_classes'] > 2:
-            y = np_utils.to_categorical(y, self.config['nb_classes'])
+        # if self.config['nb_classes'] > 2:
+        y = np_utils.to_categorical(y, self.config['nb_classes'])
 
         return y
 
@@ -86,7 +86,7 @@ class BasePreTrainer:
         train = data_manager.read_emo_texts_labels('train_cut_new')
         dev = data_manager.read_emo_texts_labels('dev_cut_new')
 
-        emos = open('../data/clean/emo_nums_chosen.txt', 'r').readlines()
+        emos = open('../data/clean/emo_nums_chosen_2.txt', 'r').readlines()
         nb_classes = len(emos)
         print 'nb_classes:', nb_classes
 
@@ -105,7 +105,7 @@ class BasePreTrainer:
 
         train = self.prepare_XY_emo(train)
         dev = self.prepare_XY_emo(dev)
-
+      
         self.model = self.build_pre_model(self.config, weights)
         self.save_pretrain_model_config()
 

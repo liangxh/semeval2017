@@ -29,7 +29,7 @@ def get_text_indexer(key_subtask):
 
 
 def get_emo_label_indexer():
-    f_emo_num = open('../data/clean/emo_nums_chosen.txt', 'r')
+    f_emo_num = open('../data/clean/emo_nums_chosen_2.txt', 'r')
     lines = f_emo_num.readlines()
     emos= []
 

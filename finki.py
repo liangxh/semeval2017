@@ -79,7 +79,7 @@ class Trainer(BaseTrainer):
         merged_model = Sequential()
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
-        merged_model.add(Dropout(0.25))
+        merged_model.add(Dropout(0.7))
 
         if config['nb_classes'] > 2:
             merged_model.add(Dense(config['nb_classes'], activation='softmax', name='dense_e'))
