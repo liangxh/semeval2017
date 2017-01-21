@@ -224,6 +224,7 @@ class SaveBestScore(Callback):
         self.score = self.trainer.evaluate('devtest')
 
         devtest_score = self.trainer.evaluate('test_new')
+
         self.dev_scores.append(self.score)
         self.devtest_scores.append(devtest_score)
         self.val_accs.append(logs.get('val_acc'))
@@ -236,6 +237,11 @@ class SaveBestScore(Callback):
             self.best_score = self.score
             self.best_epoch = self.num_epoch
             self.trainer.save_model_weight()
+
+        if self.num_epoch == self.best_epoch + 1:
+            self.trainer.save_model_weight()
+            self.best_epoch = self.num_epoch
+            self.best_score = self.score
 
     def on_train_end(self, logs={}):
         print 'maximum val_acc: ', self.max_valacc
