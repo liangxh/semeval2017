@@ -79,7 +79,7 @@ class Trainer(BaseTrainer):
         merged_model = Sequential()
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
-        merged_model.add(Dropout(0.7))
+        merged_model.add(Dropout(0.25))
 
         if config['nb_classes'] > 2:
             merged_model.add(Dense(config['nb_classes'], activation='softmax', name='dense_e'))
@@ -97,9 +97,9 @@ class Trainer(BaseTrainer):
 
 def main():
     optparser = OptionParser()
-    optparser.add_option("-t", "--task", dest="key_subtask", default="D")
+    optparser.add_option("-t", "--task", dest="key_subtask", default="E")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
-    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt")
+    optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
     optparser.add_option("-d", "--hidden_dims", dest="hidden_dims", type="int", default=250)
     optparser.add_option("-f", "--nb_filter", dest="nb_filter", type="int", default=200)
     optparser.add_option("-r", "--rnn_output_dims", dest="rnn_output_dims", type="int", default=100)
@@ -113,12 +113,12 @@ def main():
     trainer = Trainer(opts)
     trainer.train()
 
-    score = trainer.evaluate('test_new', verbose=1)
-    print "Evaluation score: %.3f" % score
+    score = trainer.evaluate('test_2017', verbose=1)
+    # print "Evaluation score: %.3f" % score
 
     trainer.load_model_weight()
-    score = trainer.evaluate('test_new', verbose=1)
-    print "Evaluation score: %.3f" % score
+    score = trainer.evaluate('test_2017', verbose=1)
+    # print "Evaluation score: %.3f" % score
 
     '''
     test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')

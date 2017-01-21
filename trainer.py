@@ -110,10 +110,10 @@ class BaseTrainer:
 
         train = self.prepare_XY(train)
         dev = self.prepare_XY(dev)
-        """
+
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
-
+        """
         fname = '../data/model/pretrain_%s_weight.hdf5' % self.model_name
         self.model.load_weights(fname, by_name=True)
         
