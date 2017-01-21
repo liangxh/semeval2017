@@ -110,7 +110,7 @@ class BaseTrainer:
 
         train = self.prepare_XY(train)
         dev = self.prepare_XY(dev)
-
+        """
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
 
@@ -128,6 +128,9 @@ class BaseTrainer:
         )
 
         bestscore.export_history()
+        """
+        fname = '../data/model/subtask%s_%s_weight_new.hdf5' % (self.key_subtask, self.model_name)
+        self.model.load_weights(fname)
 
     def pred_prob(self):
         train = data_manager.read_texts_labels(self.key_subtask, 'train_dev')
