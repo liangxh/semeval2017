@@ -133,9 +133,9 @@ class BaseTrainer:
         self.model.load_weights(fname)
 
     def pred_prob(self):
-        train = data_manager.read_texts_labels(self.key_subtask, 'train_dev')
-        dev = data_manager.read_texts_labels(self.key_subtask, 'devtest')
-        test = data_manager.read_texts_labels(self.key_subtask, 'test_2017')
+        train = data_manager.read_texts(self.key_subtask, 'train_dev')
+        dev = data_manager.read_texts(self.key_subtask, 'devtest')
+        test = data_manager.read_texts(self.key_subtask, 'test_2017')
 
         weights = dict(
             Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
@@ -150,12 +150,12 @@ class BaseTrainer:
         fname = '../data/model/subtask%s_%s_weight_new.hdf5' % (self.key_subtask, self.config['model_name'])
         self.model.load_weights(fname)
 
-        train = self.prepare_XY(train)
-        dev = self.prepare_XY(dev)
-        test = self.prepare_XY(test)
+        train = self.prepare_X(train)
+        dev = self.prepare_X(dev)
+        test = self.prepare_X(test)
 
-        for name, data in zip(['train', 'dev', 'test_new'], [train, dev, test]):
-            results = self.model.predict_proba(data[0], batch_size=self.batch_size)
+        for name, x in zip(['train', 'dev', 'test_2017'], [train, dev, test]):
+            results = self.model.predict_proba(x, batch_size=self.batch_size)
             topics = data_manager.read_topic(self.key_subtask, name)
 
             fname = '../data/pred_prob/%s_%s_%s_new.txt' % (self.key_subtask, name, self.config['model_name'])
