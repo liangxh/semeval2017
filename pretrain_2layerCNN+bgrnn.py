@@ -32,7 +32,6 @@ class Trainer(BasePreTrainer):
             nb_filter_2 = options.nb_filter_2,
             filter_length_1 = options.filter_length_1,
             filter_length_2 = options.filter_length_2,
-            hidden_dims = options.hidden_dims,
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
             dropout = options.dropout,
@@ -78,8 +77,6 @@ class Trainer(BasePreTrainer):
                                     subsample_length = 1))
 
         cnn_model.add(GlobalMaxPooling1D())
-        # cnn_model.add(Dense(config['hidden_dims']))
-        # cnn_model.add(Activation('sigmoid'))
 
         # merged model
         merged_model = Sequential()
