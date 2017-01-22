@@ -113,7 +113,7 @@ class BaseTrainer:
 
         self.model = self.build_model(self.config, weights)
         self.save_model_config()
-        """
+        
         fname = '../data/model/pretrain_%s_weight.hdf5' % self.model_name
         self.model.load_weights(fname, by_name=True)
         
@@ -131,11 +131,11 @@ class BaseTrainer:
         """
         fname = '../data/model/subtask%s_%s_weight_new.hdf5' % (self.key_subtask, self.model_name)
         self.model.load_weights(fname)
-
+        """
     def pred_prob(self):
         train = data_manager.read_texts(self.key_subtask, 'train_dev')
         dev = data_manager.read_texts(self.key_subtask, 'devtest')
-        test = data_manager.read_texts(self.key_subtask, 'test_2017')
+        test = data_manager.read_texts(self.key_subtask, 'test_new')
 
         weights = dict(
             Wemb=wordembed.get(self.text_indexer.labels(), self.fname_Wemb),
@@ -154,7 +154,7 @@ class BaseTrainer:
         dev = self.prepare_X(dev)
         test = self.prepare_X(test)
 
-        for name, x in zip(['train', 'dev', 'test_2017'], [train, dev, test]):
+        for name, x in zip(['train', 'dev', 'test_new'], [train, dev, test]):
             results = self.model.predict_proba(x, batch_size=self.batch_size)
             topics = data_manager.read_topic(self.key_subtask, name)
 
@@ -178,10 +178,10 @@ class BaseTrainer:
         texts = data_manager.read_texts(self.key_subtask, mode)
         labels = self.pred_classes(texts, verbose)
         pred_builder.build(self.key_subtask, mode, labels)
-        """
+        
         o = commands.getoutput(
              # "perl eval/score-semeval2016-task4-subtask%s.pl " \
-             "perl eval/SemEval2017_task4_test_scorer_subtask%s.pl " \
+             "perl eval/SemEval2017_task4_scorer_subtask%s.pl " \
              "../data/result/%s_%s_gold.txt " \
              "../data/result/%s_%s_pred.txt" % (
                 self.key_subtask,
@@ -199,7 +199,7 @@ class BaseTrainer:
             print "trainer.evaluate: [warning] invalid output file for semeval measures tool"
             print [o, ]
             return None
-        """
+        
     def simple_evaluate(self, test):
         test = self.prepare_XY(test)
         return self.model.evaluate(*test, batch_size=self.batch_size)
