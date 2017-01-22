@@ -35,6 +35,7 @@ class Trainer(BasePreTrainer):
             hidden_dims = options.hidden_dims,
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
+            dropout = options.dropout,
             optimizer = options.optimizer,
             rnn_output_dims = options.rnn_output_dims,
             lr = options.lr
@@ -84,7 +85,7 @@ class Trainer(BasePreTrainer):
         merged_model = Sequential()
         merged_model.add(Merge([bgrnn_model, cnn_model], mode='concat', concat_axis=1))
 
-        # merged_model.add(Dropout(0.25))
+        merged_model.add(Dropout(self.config['dropout']))
         merged_model.add(Dense(self.config['nb_classes'], activation='softmax', name="dense_pretrain"))
         print '<dense output dimension>:', self.config['nb_classes']
 
@@ -107,6 +108,7 @@ def main():
     optparser.add_option("-L", "--filter_length_2", dest="filter_length_2", type="int", default=3)
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
+    optparser.add_option("-d", "--dropout", dest="dropout", type="float", default=0.25)
     optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
     optparser.add_option("-v", "--learning rate", dest="lr", type="float", default=0.001)
     opts, args = optparser.parse_args()
