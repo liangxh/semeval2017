@@ -30,9 +30,9 @@ class Trainer(BaseTrainer):
         self.config = dict(        
             nb_filter = options.nb_filter,
             filter_length = options.filter_length,
-            hidden_dims = options.hidden_dims,
             dropout_W = options.dropout_W,
             dropout_U = options.dropout_U,
+            dropout = options.dropout,
             optimizer = options.optimizer,
             rnn_output_dims = options.rnn_output_dims,
             lr = options.lr,
@@ -72,14 +72,12 @@ class Trainer(BaseTrainer):
                                     subsample_length=1))
 
         cnn_model.add(GlobalMaxPooling1D())
-        # cnn_model.add(Dense(config['hidden_dims']))
-        # cnn_model.add(Activation('sigmoid'))
 
         # merged model
         merged_model = Sequential()
         merged_model.add(Merge([gru_model, cnn_model], mode='concat', concat_axis=1))
 
-        merged_model.add(Dropout(0.25))
+        merged_model.add(Dropout(self.config['dropout']))
 
         if config['nb_classes'] > 2:
             merged_model.add(Dense(config['nb_classes'], activation='softmax', name='dense_e'))
@@ -100,12 +98,12 @@ def main():
     optparser.add_option("-t", "--task", dest="key_subtask", default="E")
     optparser.add_option("-p", "--nb_epoch", dest="nb_epoch", type="int", default=50)
     optparser.add_option("-e", "--embedding", dest="fname_Wemb", default="glove.twitter.27B.25d.txt.trim")
-    optparser.add_option("-d", "--hidden_dims", dest="hidden_dims", type="int", default=250)
     optparser.add_option("-f", "--nb_filter", dest="nb_filter", type="int", default=200)
     optparser.add_option("-r", "--rnn_output_dims", dest="rnn_output_dims", type="int", default=100)
     optparser.add_option("-l", "--filter_length", dest="filter_length", type="int", default=3)
     optparser.add_option("-w", "--dropout_W", dest="dropout_W", type="float", default=0.25)
     optparser.add_option("-u", "--dropout_U", dest="dropout_U", type="float", default=0.25)
+    optparser.add_option("-d", "--dropout", dest="dropout", type="float", default=0.25)
     optparser.add_option("-o", "--optimizer", dest="optimizer", default="rmsprop")
     optparser.add_option("-v", "--learning rate", dest="lr", default="0.001")
     opts, args = optparser.parse_args()
