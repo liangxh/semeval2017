@@ -111,12 +111,12 @@ def main():
     trainer = Trainer(opts)
     trainer.train()
 
-    score = trainer.evaluate('test_2017', verbose=1)
-    # print "Evaluation score: %.3f" % score
+    score = trainer.evaluate('test_new', verbose=1)
+    print "Evaluation score: %.3f" % score
 
     trainer.load_model_weight()
-    score = trainer.evaluate('test_2017', verbose=1)
-    # print "Evaluation score: %.3f" % score
+    score = trainer.evaluate('test_new', verbose=1)
+    print "Evaluation score: %.3f" % score
 
     '''
     test = data_manager.read_texts_labels(opts.key_subtask, 'devtest')
